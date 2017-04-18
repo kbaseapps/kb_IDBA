@@ -8,13 +8,6 @@ MAINTAINER KBase Developer
 # RUN apt-get update
 
 
-RUN cd /opt \
-    && wget http://spades.bioinf.spbau.ru/release3.10.0/SPAdes-3.10.0-Linux.tar.gz \
-    && tar -xvzf SPAdes-3.10.0-Linux.tar.gz \
-    && rm SPAdes-3.10.0-Linux.tar.gz \
-    && pip install psutil \
-    && pip install pyyaml
-
 RUN sudo apt-get install python-dev libffi-dev libssl-dev
 RUN pip install cffi --upgrade
 RUN pip install pyopenssl --upgrade
@@ -24,9 +17,20 @@ RUN pip install pyasn1 --upgrade
 RUN pip install requests --upgrade \
     && pip install 'requests[security]' --upgrade \
     && pip install ipython \
-    && apt-get install nano
+    && apt-get install nano \
+    && pip install psutil \
+    && pip install pyyaml
 
-ENV PATH $PATH:/opt/SPAdes-3.10.0-Linux/bin
+# Install idba
+RUN cd /opt \
+    && wget https://github.com/loneknightpy/idba/releases/download/1.1.3/idba-1.1.3.tar.gz \
+    && tar xvfz idba-1.1.3.tar.gz \
+    && rm idba-1.1.3.tar.gz \
+    && cd idba-1.1.3 \
+    && ./configure \
+    && make
+
+ENV PATH $PATH:/opt/idba-1.1.3/bin
 
 # -----------------------------------------
 
