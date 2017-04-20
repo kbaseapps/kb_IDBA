@@ -30,13 +30,6 @@ A KBase module: kb_IDBA
 A simple wrapper for IDBA-UD Assembler
 https://github.com/loneknightpy/idba - Version 1.1.3
 
-????
-Always runs in careful mode.
-Runs 3 threads / CPU.
-Maximum memory use is set to available memory - 1G.
-Autodetection is used for the PHRED quality offset and k-mer sizes.
-A coverage cutoff is not specified.
-
 
 =cut
 
@@ -117,9 +110,9 @@ sub new
 
 
 
-=head2 run_IDBA
+=head2 run_idba_ud
 
-  $output = $obj->run_IDBA($params)
+  $output = $obj->run_idba_ud($params)
 
 =over 4
 
@@ -128,16 +121,15 @@ sub new
 =begin html
 
 <pre>
-$params is a kb_IDBA.IDBA_Params
-$output is a kb_IDBA.IDBA_Output
-IDBA_Params is a reference to a hash where the following keys are defined:
+$params is a kb_IDBA.idba_ud_Params
+$output is a kb_IDBA.idba_ud_Output
+idba_ud_Params is a reference to a hash where the following keys are defined:
 	workspace_name has a value which is a string
-	output_contigset_name has a value which is a string
 	read_libraries has a value which is a reference to a list where each element is a kb_IDBA.paired_end_lib
-	dna_source has a value which is a string
+	output_contigset_name has a value which is a string
 	min_contig_len has a value which is an int
 paired_end_lib is a string
-IDBA_Output is a reference to a hash where the following keys are defined:
+idba_ud_Output is a reference to a hash where the following keys are defined:
 	report_name has a value which is a string
 	report_ref has a value which is a string
 
@@ -147,16 +139,15 @@ IDBA_Output is a reference to a hash where the following keys are defined:
 
 =begin text
 
-$params is a kb_IDBA.IDBA_Params
-$output is a kb_IDBA.IDBA_Output
-IDBA_Params is a reference to a hash where the following keys are defined:
+$params is a kb_IDBA.idba_ud_Params
+$output is a kb_IDBA.idba_ud_Output
+idba_ud_Params is a reference to a hash where the following keys are defined:
 	workspace_name has a value which is a string
-	output_contigset_name has a value which is a string
 	read_libraries has a value which is a reference to a list where each element is a kb_IDBA.paired_end_lib
-	dna_source has a value which is a string
+	output_contigset_name has a value which is a string
 	min_contig_len has a value which is an int
 paired_end_lib is a string
-IDBA_Output is a reference to a hash where the following keys are defined:
+idba_ud_Output is a reference to a hash where the following keys are defined:
 	report_name has a value which is a string
 	report_ref has a value which is a string
 
@@ -171,7 +162,7 @@ Run IDBA on paired end libraries
 
 =cut
 
- sub run_IDBA
+ sub run_idba_ud
 {
     my($self, @args) = @_;
 
@@ -180,7 +171,7 @@ Run IDBA on paired end libraries
     if ((my $n = @args) != 1)
     {
 	Bio::KBase::Exceptions::ArgumentValidationError->throw(error =>
-							       "Invalid argument count for function run_IDBA (received $n, expecting 1)");
+							       "Invalid argument count for function run_idba_ud (received $n, expecting 1)");
     }
     {
 	my($params) = @args;
@@ -188,31 +179,31 @@ Run IDBA on paired end libraries
 	my @_bad_arguments;
         (ref($params) eq 'HASH') or push(@_bad_arguments, "Invalid type for argument 1 \"params\" (value was \"$params\")");
         if (@_bad_arguments) {
-	    my $msg = "Invalid arguments passed to run_IDBA:\n" . join("", map { "\t$_\n" } @_bad_arguments);
+	    my $msg = "Invalid arguments passed to run_idba_ud:\n" . join("", map { "\t$_\n" } @_bad_arguments);
 	    Bio::KBase::Exceptions::ArgumentValidationError->throw(error => $msg,
-								   method_name => 'run_IDBA');
+								   method_name => 'run_idba_ud');
 	}
     }
 
     my $url = $self->{url};
     my $result = $self->{client}->call($url, $self->{headers}, {
-	    method => "kb_IDBA.run_IDBA",
+	    method => "kb_IDBA.run_idba_ud",
 	    params => \@args,
     });
     if ($result) {
 	if ($result->is_error) {
 	    Bio::KBase::Exceptions::JSONRPC->throw(error => $result->error_message,
 					       code => $result->content->{error}->{code},
-					       method_name => 'run_IDBA',
+					       method_name => 'run_idba_ud',
 					       data => $result->content->{error}->{error} # JSON::RPC::ReturnObject only supports JSONRPC 1.1 or 1.O
 					      );
 	} else {
 	    return wantarray ? @{$result->result} : $result->result->[0];
 	}
     } else {
-        Bio::KBase::Exceptions::HTTP->throw(error => "Error invoking method run_IDBA",
+        Bio::KBase::Exceptions::HTTP->throw(error => "Error invoking method run_idba_ud",
 					    status_line => $self->{client}->status_line,
-					    method_name => 'run_IDBA',
+					    method_name => 'run_idba_ud',
 				       );
     }
 }
@@ -260,16 +251,16 @@ sub version {
             Bio::KBase::Exceptions::JSONRPC->throw(
                 error => $result->error_message,
                 code => $result->content->{code},
-                method_name => 'run_IDBA',
+                method_name => 'run_idba_ud',
             );
         } else {
             return wantarray ? @{$result->result} : $result->result->[0];
         }
     } else {
         Bio::KBase::Exceptions::HTTP->throw(
-            error => "Error invoking method run_IDBA",
+            error => "Error invoking method run_idba_ud",
             status_line => $self->{client}->status_line,
-            method_name => 'run_IDBA',
+            method_name => 'run_idba_ud',
         );
     }
 }
@@ -306,37 +297,6 @@ sub _validate_version {
 
 
 
-=head2 bool
-
-=over 4
-
-
-
-=item Description
-
-A boolean. 0 = false, anything else = true.
-
-
-=item Definition
-
-=begin html
-
-<pre>
-an int
-</pre>
-
-=end html
-
-=begin text
-
-an int
-
-=end text
-
-=back
-
-
-
 =head2 paired_end_lib
 
 =over 4
@@ -369,7 +329,7 @@ a string
 
 
 
-=head2 IDBA_Params
+=head2 idba_ud_Params
 
 =over 4
 
@@ -377,15 +337,12 @@ a string
 
 =item Description
 
-Input parameters for running IDBA.
+Input parameters for running idba_ud.
 string workspace_name - the name of the workspace from which to take
    input and store output.
-string output_contigset_name - the name of the output contigset
 list<paired_end_lib> read_libraries - Illumina PairedEndLibrary files
     to assemble.
-string dna_source - the source of the DNA used for sequencing
-    'single_cell': DNA amplified from a single cell via MDA
-    anything else: Standard DNA sample from multiple cells
+string output_contigset_name - the name of the output contigset
 
 
 =item Definition
@@ -395,9 +352,8 @@ string dna_source - the source of the DNA used for sequencing
 <pre>
 a reference to a hash where the following keys are defined:
 workspace_name has a value which is a string
-output_contigset_name has a value which is a string
 read_libraries has a value which is a reference to a list where each element is a kb_IDBA.paired_end_lib
-dna_source has a value which is a string
+output_contigset_name has a value which is a string
 min_contig_len has a value which is an int
 
 </pre>
@@ -408,9 +364,8 @@ min_contig_len has a value which is an int
 
 a reference to a hash where the following keys are defined:
 workspace_name has a value which is a string
-output_contigset_name has a value which is a string
 read_libraries has a value which is a reference to a list where each element is a kb_IDBA.paired_end_lib
-dna_source has a value which is a string
+output_contigset_name has a value which is a string
 min_contig_len has a value which is an int
 
 
@@ -420,7 +375,7 @@ min_contig_len has a value which is an int
 
 
 
-=head2 IDBA_Output
+=head2 idba_ud_Output
 
 =over 4
 

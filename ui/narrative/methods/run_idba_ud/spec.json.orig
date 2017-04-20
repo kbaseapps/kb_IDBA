@@ -74,7 +74,7 @@
         "service-mapping": {
             "url": "",
             "name": "kb_IDBA",
-            "method": "run_IDBA",
+            "method": "run_idba_ud",
             "input_mapping": [
                 {
                     "narrative_system_variable": "workspace",

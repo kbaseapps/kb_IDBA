@@ -19,12 +19,6 @@ import us.kbase.common.service.UnauthorizedException;
  * A KBase module: kb_IDBA
  * A simple wrapper for IDBA-UD Assembler
  * https://github.com/loneknightpy/idba - Version 1.1.3
- * ????
- * Always runs in careful mode.
- * Runs 3 threads / CPU.
- * Maximum memory use is set to available memory - 1G.
- * Autodetection is used for the PHRED quality offset and k-mer sizes.
- * A coverage cutoff is not specified.
  * </pre>
  */
 public class KbIDBAClient {
@@ -171,20 +165,20 @@ public class KbIDBAClient {
     }
 
     /**
-     * <p>Original spec-file function name: run_IDBA</p>
+     * <p>Original spec-file function name: run_idba_ud</p>
      * <pre>
      * Run IDBA on paired end libraries
      * </pre>
-     * @param   params   instance of type {@link us.kbase.kbidba.IDBAParams IDBAParams} (original type "IDBA_Params")
-     * @return   parameter "output" of type {@link us.kbase.kbidba.IDBAOutput IDBAOutput} (original type "IDBA_Output")
+     * @param   params   instance of type {@link us.kbase.kbidba.IdbaUdParams IdbaUdParams} (original type "idba_ud_Params")
+     * @return   parameter "output" of type {@link us.kbase.kbidba.IdbaUdOutput IdbaUdOutput} (original type "idba_ud_Output")
      * @throws IOException if an IO exception occurs
      * @throws JsonClientException if a JSON RPC exception occurs
      */
-    public IDBAOutput runIDBA(IDBAParams params, RpcContext... jsonRpcContext) throws IOException, JsonClientException {
+    public IdbaUdOutput runIdbaUd(IdbaUdParams params, RpcContext... jsonRpcContext) throws IOException, JsonClientException {
         List<Object> args = new ArrayList<Object>();
         args.add(params);
-        TypeReference<List<IDBAOutput>> retType = new TypeReference<List<IDBAOutput>>() {};
-        List<IDBAOutput> res = caller.jsonrpcCall("kb_IDBA.run_IDBA", args, retType, true, true, jsonRpcContext, this.serviceVersion);
+        TypeReference<List<IdbaUdOutput>> retType = new TypeReference<List<IdbaUdOutput>>() {};
+        List<IdbaUdOutput> res = caller.jsonrpcCall("kb_IDBA.run_idba_ud", args, retType, true, true, jsonRpcContext, this.serviceVersion);
         return res.get(0);
     }
 

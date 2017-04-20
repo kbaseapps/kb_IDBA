@@ -12,7 +12,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 
 /**
- * <p>Original spec-file type: IDBA_Output</p>
+ * <p>Original spec-file type: idba_ud_Output</p>
  * <pre>
  * Output parameters for IDBA run.
  * string report_name - the name of the KBaseReport.Report workspace
@@ -27,7 +27,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
     "report_name",
     "report_ref"
 })
-public class IDBAOutput {
+public class IdbaUdOutput {
 
     @JsonProperty("report_name")
     private String reportName;
@@ -45,7 +45,7 @@ public class IDBAOutput {
         this.reportName = reportName;
     }
 
-    public IDBAOutput withReportName(String reportName) {
+    public IdbaUdOutput withReportName(String reportName) {
         this.reportName = reportName;
         return this;
     }
@@ -60,7 +60,7 @@ public class IDBAOutput {
         this.reportRef = reportRef;
     }
 
-    public IDBAOutput withReportRef(String reportRef) {
+    public IdbaUdOutput withReportRef(String reportRef) {
         this.reportRef = reportRef;
         return this;
     }
@@ -77,7 +77,7 @@ public class IDBAOutput {
 
     @Override
     public String toString() {
-        return ((((((("IDBAOutput"+" [reportName=")+ reportName)+", reportRef=")+ reportRef)+", additionalProperties=")+ additionalProperties)+"]");
+        return ((((((("IdbaUdOutput"+" [reportName=")+ reportName)+", reportRef=")+ reportRef)+", additionalProperties=")+ additionalProperties)+"]");
     }
 
 }

@@ -333,10 +333,10 @@ class Application(object):
         self.serverlog.set_log_level(6)
         self.rpc_service = JSONRPCServiceCustom()
         self.method_authentication = dict()
-        self.rpc_service.add(impl_kb_IDBA.run_IDBA,
-                             name='kb_IDBA.run_IDBA',
+        self.rpc_service.add(impl_kb_IDBA.run_idba_ud,
+                             name='kb_IDBA.run_idba_ud',
                              types=[dict])
-        self.method_authentication['kb_IDBA.run_IDBA'] = 'required'  # noqa
+        self.method_authentication['kb_IDBA.run_idba_ud'] = 'required'  # noqa
         self.rpc_service.add(impl_kb_IDBA.status,
                              name='kb_IDBA.status',
                              types=[dict])

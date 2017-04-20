@@ -6,18 +6,14 @@ import os
 import re
 import uuid
 from pprint import pformat
+from pprint import pprint
 from biokbase.workspace.client import Workspace as workspaceService  # @UnresolvedImport @IgnorePep8
 import requests
 import json
 import psutil
 import subprocess
-# import hashlib
 import numpy as np
 import yaml
-#????
-#from kb_IDBA.GenericClient import GenericClient, ServerError
-#from kb_IDBA.kbdynclient import KBDynClient, ServerError
-#????
 from ReadsUtils.ReadsUtilsClient import ReadsUtils  # @IgnorePep8
 from ReadsUtils.baseclient import ServerError
 from AssemblyUtil.AssemblyUtilClient import AssemblyUtil
@@ -27,7 +23,6 @@ from kb_quast.kb_quastClient import kb_quast
 from kb_quast.baseclient import ServerError as QUASTError
 from kb_ea_utils.kb_ea_utilsClient import kb_ea_utils
 import time
-
 
 class ShockException(Exception):
     pass
@@ -44,13 +39,6 @@ class kb_IDBA:
     A KBase module: kb_IDBA
 A simple wrapper for IDBA-UD Assembler
 https://github.com/loneknightpy/idba - Version 1.1.3
-
-????
-Always runs in careful mode.
-Runs 3 threads / CPU.
-Maximum memory use is set to available memory - 1G.
-Autodetection is used for the PHRED quality offset and k-mer sizes.
-A coverage cutoff is not specified.
     '''
 
     ######## WARNING FOR GEVENT USERS ####### noqa
@@ -60,12 +48,13 @@ A coverage cutoff is not specified.
     # the latter method is running.
     ######################################### noqa
     VERSION = "0.0.1"
-    GIT_URL = "https://github.com/kbaseapps/kb_IDBA.git"
-    GIT_COMMIT_HASH = "61a3ea6b91213d945e7e8ed95ed5abe968103e5e"
+    GIT_URL = ""
+    GIT_COMMIT_HASH = "75e7344947450fec45b467082ac5088bd16fd3b7"
 
     #BEGIN_CLASS_HEADER
     # Class variables and functions can be defined in this block
-    DISABLE_SPADES_OUTPUT = False  # should be False in production
+    DISABLE_FQ2FA_OUTPUT = False  # should be False in production
+    DISABLE_IDBA_OUTPUT = False  # should be False in production
 
     PARAM_IN_WS = 'workspace_name'
     PARAM_IN_LIB = 'read_libraries'
@@ -78,11 +67,6 @@ A coverage cutoff is not specified.
     INVALID_WS_OBJ_NAME_RE = re.compile('[^\\w\\|._-]')
     INVALID_WS_NAME_RE = re.compile('[^\\w:._-]')
 
-    THREADS_PER_CORE = 3
-    MEMORY_OFFSET_GB = 1  # 1GB
-    MIN_MEMORY_GB = 5
-    GB = 1000000000
-
     URL_WS = 'workspace-url'
     URL_SHOCK = 'shock-url'
     URL_KB_END = 'kbase-endpoint'
@@ -94,6 +78,7 @@ A coverage cutoff is not specified.
         print(('\n' if prefix_newline else '') +
               str(time.time()) + ': ' + str(message))
 
+
     def check_shock_response(self, response, errtxt):
         if not response.ok:
             try:
@@ -104,6 +89,7 @@ A coverage cutoff is not specified.
                          response.content)
                 response.raise_for_status()
             raise ShockException(errtxt + str(err))
+
 
     # Helper script borrowed from the transform service, logger removed
     def upload_file_to_shock(self, file_path, token):
@@ -158,135 +144,67 @@ A coverage cutoff is not specified.
         return new_contigs_file
 
 
-    # IDBA is configured with yaml
-    #
-    def generate_IDBAyaml(self, reads_data):
-        left = []  # fwd in fr orientation
-        right = []  # rev
-        single = [] # single end reads
-        pacbio = [] # pacbio CLR reads (for pacbio CCS use -s option.)
-        interlaced = []
-        illumina_present = 0
-        iontorrent_present = 0
-        for read in reads_data:
-            seq_tech = read['seq_tech']
-            if seq_tech == "PacBio CLR":
-                pacbio.append(read['fwd_file'])
-            elif read['type'] == "paired":
-                if 'rev_file' in read and read['rev_file']:
-                    left.append(read['fwd_file'])
-                    right.append(read['rev_file'])
-                else:
-                    interlaced.append(read['fwd_file'])
-            elif read['type'] == "single":
-                single.append(read['fwd_file'])
+    def exec_fq2fa(self, input_reads, outfile_fasta):
 
-            if seq_tech == "IonTorrent":
-                iontorrent_present = 1
-            elif seq_tech == "Illumina":
-                illumina_present = 1
+        fq2fa_cmd = ['fq2fa', '--merge', '--filter',
+                      input_reads['fwd_file'],  input_reads['rev_file'],
+                      outfile_fasta]
 
-        if (illumina_present == 1 and iontorrent_present == 1):
-            raise ValueError('Both IonTorrent and Illumina read libraries exist. ' +
-                             'IDBA can not assemble them together.')
+        print("fq2fa CMD:" + str(fq2fa_cmd))
+        self.log(fq2fa_cmd)
 
-        yml = []
-        yml_index_counter = 0
-        # Pacbio CLR ahs to be run with at least one single end or paired end library
-        other_reads_present_for_pacbio = 0
-        if left or interlaced:
-            yml.append({'type': 'paired-end',
-                        'orientation': 'fr'})
-            if left:
-                yml[yml_index_counter]['left reads'] = left
-                yml[yml_index_counter]['right reads'] = right
-            if interlaced:
-                yml[yml_index_counter]['interlaced reads'] = interlaced
-            yml_index_counter += 1
-            other_reads_present_for_pacbio = 1
-        if single:
-            yml.append({'type': "single"})
-            yml[yml_index_counter]['single reads'] = single
-            yml_index_counter += 1
-            other_reads_present_for_pacbio = 1
-        if pacbio:
-            if other_reads_present_for_pacbio == 1:
-                yml.append({'type': "pacbio"})
-                yml[yml_index_counter]['single reads'] = pacbio
-                yml_index_counter += 1
-            else:
-                # RAISE AN ERROR AS PACBIO REQUIRES AT LEAST
-                # ONE SINGLE OR PAIRED ENDS LIBRARY
-                raise ValueError('Per IDBA requirements : If doing PacBio CLR reads, you must ' +
-                                 'also supply at least one paired end or single end reads library')
-        yml_path = os.path.join(self.scratch, 'run.yaml')
-        with open(yml_path, 'w') as yml_file:
-            yaml.safe_dump(yml, yml_file)
-        return yml_path, iontorrent_present
+        if self.DISABLE_FQ2FA_OUTPUT:
+            with open(os.devnull, 'w') as null:
+                p = subprocess.Popen(fq2fa_cmd, cwd=self.scratch, shell=False,
+                                     stdout=null)
+        else:
+            p = subprocess.Popen(fq2fa_cmd, cwd=self.scratch, shell=False)
+        retcode = p.wait()
 
-    def exec_IDBA(self, dna_source, reads_data, phred_type):
-        threads = psutil.cpu_count() * self.THREADS_PER_CORE
-        mem = (psutil.virtual_memory().available / self.GB -
-               self.MEMORY_OFFSET_GB)
-        if mem < self.MIN_MEMORY_GB:
-            raise ValueError(
-                'Only ' + str(psutil.virtual_memory().available) +
-                ' bytes of memory are available. The IDBA wrapper will' +
-                ' not run without at least ' +
-                str(self.MIN_MEMORY_GB + self.MEMORY_OFFSET_GB) +
-                ' gigabytes available')
+        self.log('Return code: ' + str(retcode))
+        if p.returncode != 0:
+            raise ValueError('Error running fq2fa, return code: ' +
+                             str(retcode) + '\n')
+
+
+    def exec_idba_ud(self, reads_data):
+
+        #threads = psutil.cpu_count() * self.THREADS_PER_CORE
 
         outdir = os.path.join(self.scratch, 'IDBAoutput_dir')
         if not os.path.exists(outdir):
             os.makedirs(outdir)
-        tmpdir = os.path.join(self.scratch, 'IDBAtmp_dir')
-        if not os.path.exists(tmpdir):
-            os.makedirs(tmpdir)
 
-        cmd = ['IDBA.py', '--threads', str(threads),
-               '--memory', str(mem), '-o', outdir, '--tmp-dir', tmpdir]
-
-        print("THE DNA SOURCE IS : " + str(dna_source))
-        if dna_source == self.PARAM_IN_SINGLE_CELL:
-            cmd += ['--sc']
-        if dna_source == self.PARAM_IN_PLASMID:
-            cmd += ['--plasmid']
-            # The plasmid assembly can only be run on a single library
-            if len(reads_data) > 1 :
-                raise ValueError('Plasmid assembly requires that one ' +
-                                 'and only one library as input. ' +
-                                 str(len(reads_data)) + ' libraries detected.')
-        if dna_source == self.PARAM_IN_METAGENOME:
-            cmd += ['--meta']
-            # The metagenome assembly can only be run on a single library
-            # The library must be paired end.
-            if len(reads_data) > 1 or reads_data[0]['type'] != 'paired':
-                error_msg = 'Metagenome assembly requires that one and ' + \
+        # The fq2fa can only be run on a single library
+        # The library must be paired end.
+        if len(reads_data) > 1 or reads_data[0]['type'] != 'paired':
+            error_msg = 'IDBA-UD assembly requires that one and ' + \
                             'only one paired end library as input.'
-                if len(reads_data) > 1:
-                    error_msg += ' ' + str(len(reads_data)) + \
+            if len(reads_data) > 1:
+                error_msg += ' ' + str(len(reads_data)) + \
                                  ' libraries detected.'
-                raise ValueError(error_msg)
-        else:
-            cmd += ['--careful']
-        cmd += ['--phred-offset', phred_type]
-#        print("LENGTH OF READSDATA IN EXEC: " + str(len(reads_data)))
-#        print("READS DATA: " + str(reads_data))
-#        print("SPADES YAML: " + str(self.generate_IDBAyaml(reads_data)))
-        IDBAyaml_path, iontorrent_present = self.generate_IDBA_yaml(reads_data)
-        if iontorrent_present == 1:
-            cmd += ['--iontorrent']
-        cmd += ['--dataset', IDBAyaml_path]
-        self.log('Running IDBA command line:')
-        print("SPADES CMD:" + str(cmd))
-        self.log(cmd)
+            raise ValueError(error_msg)
 
-        if self.DISABLE_SPADES_OUTPUT:
+        print("LENGTH OF READSDATA IN EXEC: " + str(len(reads_data)))
+        print("READS DATA: " + str(reads_data))
+
+        fq2fa_outfile = os.path.join(outdir, 'fq2fa-output.fasta')
+
+        self.exec_fq2fa(reads_data[0], fq2fa_outfile)
+
+        idba_ud_cmd = ['idba_ud', '-r',
+                       fq2fa_outfile,
+                       '-o', outdir]
+
+        print("idba_ud CMD:" + str(idba_ud_cmd))
+        self.log(idba_ud_cmd)
+
+        if self.DISABLE_IDBA_OUTPUT:
             with open(os.devnull, 'w') as null:
-                p = subprocess.Popen(cmd, cwd=self.scratch, shell=False,
+                p = subprocess.Popen(idba_ud_cmd, cwd=self.scratch, shell=False,
                                      stdout=null)
         else:
-            p = subprocess.Popen(cmd, cwd=self.scratch, shell=False)
+            p = subprocess.Popen(idba_ud_cmd, cwd=self.scratch, shell=False)
         retcode = p.wait()
 
         self.log('Return code: ' + str(retcode))
@@ -295,6 +213,7 @@ A coverage cutoff is not specified.
                              str(retcode) + '\n')
 
         return outdir
+
 
     # adapted from
     # https://github.com/kbase/transform/blob/master/plugins/scripts/convert/trns_transform_KBaseFile_AssemblyFile_to_KBaseGenomes_ContigSet.py
@@ -336,6 +255,7 @@ A coverage cutoff is not specified.
             fasta_dict[contig_id] = sequence_len
         return fasta_dict
 
+
     def load_report(self, input_file_name, params, wsname):
         fasta_stats = self.load_stats(input_file_name)
         lengths = [fasta_stats[contig_id] for contig_id in fasta_stats]
@@ -370,109 +290,18 @@ A coverage cutoff is not specified.
                              'name': 'report.html',
                              'label': 'QUAST report'}
                             ],
-             'report_object_name': 'kb_megahit_report_' + str(uuid.uuid4()),
+             'report_object_name': 'kb_IDBA-UD_report_' + str(uuid.uuid4()),
              'workspace_name': params['workspace_name']
             })
         reportName = report_info['name']
         reportRef = report_info['ref']
         return reportName, reportRef
 
+
     def make_ref(self, object_info):
         return str(object_info[6]) + '/' + str(object_info[0]) + \
             '/' + str(object_info[4])
 
-    def determine_unknown_phreds(self, reads,
-                                 phred64_reads,
-                                 phred33_reads,
-                                 unknown_phred_reads,
-                                 reftoname):
-        print("IN UNKNOWN CHECKING")
-        eautils = kb_ea_utils(self.callbackURL)
-        for ref in unknown_phred_reads:
-            rds = reads[ref]
-            obj_name = reftoname[ref]
-            files_to_check = []
-            f = rds['files']
-            if f['type'] == 'interleaved':
-                files_to_check.append(f['fwd'])
-            elif f['type'] == 'paired':
-                files_to_check.append(f['fwd'])
-                files_to_check.append(f['rev'])
-            elif f['type'] == 'single':
-                files_to_check.append(f['fwd'])
-            # print("FILES TO CHECK:" + str(files_to_check))
-            for file_path in files_to_check:
-                ea_stats_dict = eautils.calculate_fastq_stats({'read_library_path': file_path})
-                # print("EA UTILS STATS : " + str(ea_stats_dict))
-                if ea_stats_dict['phred_type'] == '33':
-                    phred33_reads.add(obj_name)
-                elif ea_stats_dict['phred_type'] == '64':
-                    phred64_reads.add(obj_name)
-                else: 
-                    raise ValueError(('Reads object {} ({}) phred type is not of the ' +
-                                      'expected value of 33 or 64. It had a phred type of ' +
-                                      '{}').format(obj_name, rds, ea_stats_dict['phred_type']))
-        return phred64_reads, phred33_reads
-
-    def check_reads(self, params, reads, reftoname):
-
-        phred64_reads, phred33_reads, unknown_phred_reads = (set() for i in range(3))
-
-        for ref in reads:
-            rds = reads[ref]
-            obj_name = reftoname[ref]
-            obj_ref = rds['ref']
-            if rds['phred_type'] == '33':
-                phred33_reads.add(obj_name)
-            elif rds['phred_type'] == '64':
-                phred64_reads.add(obj_name)
-            else:
-                unknown_phred_reads.add(ref)
-
-            if rds['read_orientation_outward'] == self.TRUE:
-                raise ValueError(
-                    ('Reads object {} ({}) is marked as having outward ' +
-                     'oriented reads, which IDBA does not ' +
-                     'support.').format(obj_name, obj_ref))
-
-            # ideally types would be firm enough that we could rely on the
-            # metagenomic boolean. However KBaseAssembly doesn't have the field
-            # and it's optional anyway. Ideally fix those issues and then set
-            # the --meta command line flag automatically based on the type
-            if (rds['single_genome'] == self.TRUE and
-                    params[self.PARAM_IN_DNA_SOURCE] ==
-                    self.PARAM_IN_METAGENOME):
-                raise ValueError(
-                    ('Reads object {} ({}) is marked as containing dna from ' +
-                     'a single genome but the assembly method was specified ' +
-                     'as metagenomic').format(obj_name, obj_ref))
-            if (rds['single_genome'] == self.FALSE and
-                    params[self.PARAM_IN_DNA_SOURCE] !=
-                    self.PARAM_IN_METAGENOME):
-                raise ValueError(
-                    ('Reads object {} ({}) is marked as containing ' +
-                     'metagenomic data but the assembly method was not ' +
-                     'specified as metagenomic').format(obj_name, obj_ref))
-
-        # IF UNKNOWN TYPE NEED TO DETERMINE PHRED TYPE USING EAUTILS
-        if len(unknown_phred_reads) > 0:
-            phred64_reads, phred33_reads = \
-                self.determine_unknown_phreds(reads, phred64_reads, phred33_reads,
-                                              unknown_phred_reads, reftoname)
-        # IF THERE ARE READS OF BOTH PHRED 33 and 64, throw an error
-        if (len(phred64_reads) > 0) and (len(phred33_reads) > 0):
-            raise ValueError(
-                    ('The set of Reads objects passed in have reads that have different ' +
-                     'phred type scores. IDBA does not support assemblies of ' +
-                     'reads with different phred type scores.\nThe following read objects ' +
-                     'have phred 33 scores : {}.\nThe following read objects have phred 64 ' +
-                     'scores : {}').format(", ".join(phred33_reads), ", ".join(phred64_reads)))
-        elif len(phred64_reads) > 0:
-            return '64'
-        elif len(phred33_reads) > 0:
-            return '33'
-        else:
-            raise ValueError('The phred type of the read(s) was unable to be determined')
 
     def process_params(self, params):
         if (self.PARAM_IN_WS not in params or
@@ -524,36 +353,34 @@ A coverage cutoff is not specified.
         pass
 
 
-    def run_IDBA(self, ctx, params):
+    def run_idba_ud(self, ctx, params):
         """
         Run IDBA on paired end libraries
-        :param params: instance of type "IDBA_Params" (Input parameters for
-           running IDBA. string workspace_name - the name of the workspace
-           from which to take input and store output. string
-           output_contigset_name - the name of the output contigset
+        :param params: instance of type "idba_ud_Params" (Input parameters
+           for running idba_ud. string workspace_name - the name of the
+           workspace from which to take input and store output.
            list<paired_end_lib> read_libraries - Illumina PairedEndLibrary
-           files to assemble. string dna_source - the source of the DNA used
-           for sequencing 'single_cell': DNA amplified from a single cell via
-           MDA anything else: Standard DNA sample from multiple cells) ->
-           structure: parameter "workspace_name" of String, parameter
-           "output_contigset_name" of String, parameter "read_libraries" of
-           list of type "paired_end_lib" (The workspace object name of a
-           PairedEndLibrary file, whether of the KBaseAssembly or KBaseFile
-           type.), parameter "dna_source" of String, parameter
-           "min_contig_len" of Long
-        :returns: instance of type "IDBA_Output" (Output parameters for IDBA
-           run. string report_name - the name of the KBaseReport.Report
+           files to assemble. string output_contigset_name - the name of the
+           output contigset) -> structure: parameter "workspace_name" of
+           String, parameter "read_libraries" of list of type
+           "paired_end_lib" (The workspace object name of a PairedEndLibrary
+           file, whether of the KBaseAssembly or KBaseFile type.), parameter
+           "output_contigset_name" of String, parameter "min_contig_len" of
+           Long
+        :returns: instance of type "idba_ud_Output" (Output parameters for
+           IDBA run. string report_name - the name of the KBaseReport.Report
            workspace object. string report_ref - the workspace reference of
            the report.) -> structure: parameter "report_name" of String,
            parameter "report_ref" of String
         """
         # ctx is the context object
         # return variables are: output
-        #BEGIN run_IDBA
-
+        #BEGIN run_idba_ud
+        
+        print("===================  IN run_idba_ud")
         # A whole lot of this is adapted or outright copied from
         # https://github.com/msneddon/MEGAHIT
-        self.log('Running run_IDBA with params:\n' + pformat(params))
+        self.log('Running run_idba_ud with params:\n' + pformat(params))
 
         token = ctx['token']
 
@@ -602,14 +429,13 @@ A coverage cutoff is not specified.
 
         self.log('Got reads data from converter:\n' + pformat(reads))
 
-        phred_type = self.check_reads(params, reads, reftoname)
 
         reads_data = []
         for ref in reads:
             reads_name = reftoname[ref]
             f = reads[ref]['files']
-#            print ("REF:" + str(ref))
-#            print ("READS REF:" + str(reads[ref]))
+            print ("REF:" + str(ref))
+            print ("READS REF:" + str(reads[ref]))
             seq_tech = reads[ref]["sequencing_tech"]
             if f['type'] == 'interleaved':
                 reads_data.append({'fwd_file': f['fwd'], 'type':'paired',
@@ -622,12 +448,17 @@ A coverage cutoff is not specified.
                                    'seq_tech': seq_tech})
             else:
                 raise ValueError('Something is very wrong with read lib' + reads_name)
-        IDBAout = self.exec_IDBA(params[self.PARAM_IN_DNA_SOURCE],
-                                      reads_data, phred_type)
-        self.log('IDBA output dir: ' + IDBAout)
+
+        print("READS_DATA: ")
+        pprint(reads_data)
+        print("============================   END OF READS_DATA: ")
+
+        idba_out = self.exec_idba_ud(reads_data)
+        self.log('IDBA output dir: ' + idba_out)
 
         # parse the output and save back to KBase
-        output_contigs = os.path.join(IDBAout, 'scaffolds.fasta')
+        output_contigs = os.path.join(idba_out, 'contig.fa')
+
         if 'min_contig_len' in params and int(params['min_contig_len']) > 0:
             self.log ("Filtering out contigs with len < min_contig_len: "+str(params['min_contig_len']))
             output_contigs = self.filter_contigs_file (output_contigs, int(params['min_contig_len']))
@@ -644,11 +475,12 @@ A coverage cutoff is not specified.
         output = {'report_name': report_name,
                   'report_ref': report_ref
                   }
-        #END run_IDBA
+
+        #END run_idba_ud
 
         # At some point might do deeper type checking...
         if not isinstance(output, dict):
-            raise ValueError('Method run_IDBA return value ' +
+            raise ValueError('Method run_idba_ud return value ' +
                              'output is not type dict as required.')
         # return the results
         return [output]

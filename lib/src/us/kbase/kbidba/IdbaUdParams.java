@@ -13,17 +13,14 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 
 /**
- * <p>Original spec-file type: IDBA_Params</p>
+ * <p>Original spec-file type: idba_ud_Params</p>
  * <pre>
- * Input parameters for running IDBA.
+ * Input parameters for running idba_ud.
  * string workspace_name - the name of the workspace from which to take
  *    input and store output.
- * string output_contigset_name - the name of the output contigset
  * list<paired_end_lib> read_libraries - Illumina PairedEndLibrary files
  *     to assemble.
- * string dna_source - the source of the DNA used for sequencing
- *     'single_cell': DNA amplified from a single cell via MDA
- *     anything else: Standard DNA sample from multiple cells
+ * string output_contigset_name - the name of the output contigset
  * </pre>
  * 
  */
@@ -31,21 +28,18 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 @Generated("com.googlecode.jsonschema2pojo")
 @JsonPropertyOrder({
     "workspace_name",
-    "output_contigset_name",
     "read_libraries",
-    "dna_source",
+    "output_contigset_name",
     "min_contig_len"
 })
-public class IDBAParams {
+public class IdbaUdParams {
 
     @JsonProperty("workspace_name")
     private java.lang.String workspaceName;
-    @JsonProperty("output_contigset_name")
-    private java.lang.String outputContigsetName;
     @JsonProperty("read_libraries")
     private List<String> readLibraries;
-    @JsonProperty("dna_source")
-    private java.lang.String dnaSource;
+    @JsonProperty("output_contigset_name")
+    private java.lang.String outputContigsetName;
     @JsonProperty("min_contig_len")
     private Long minContigLen;
     private Map<java.lang.String, Object> additionalProperties = new HashMap<java.lang.String, Object>();
@@ -60,23 +54,8 @@ public class IDBAParams {
         this.workspaceName = workspaceName;
     }
 
-    public IDBAParams withWorkspaceName(java.lang.String workspaceName) {
+    public IdbaUdParams withWorkspaceName(java.lang.String workspaceName) {
         this.workspaceName = workspaceName;
-        return this;
-    }
-
-    @JsonProperty("output_contigset_name")
-    public java.lang.String getOutputContigsetName() {
-        return outputContigsetName;
-    }
-
-    @JsonProperty("output_contigset_name")
-    public void setOutputContigsetName(java.lang.String outputContigsetName) {
-        this.outputContigsetName = outputContigsetName;
-    }
-
-    public IDBAParams withOutputContigsetName(java.lang.String outputContigsetName) {
-        this.outputContigsetName = outputContigsetName;
         return this;
     }
 
@@ -90,23 +69,23 @@ public class IDBAParams {
         this.readLibraries = readLibraries;
     }
 
-    public IDBAParams withReadLibraries(List<String> readLibraries) {
+    public IdbaUdParams withReadLibraries(List<String> readLibraries) {
         this.readLibraries = readLibraries;
         return this;
     }
 
-    @JsonProperty("dna_source")
-    public java.lang.String getDnaSource() {
-        return dnaSource;
+    @JsonProperty("output_contigset_name")
+    public java.lang.String getOutputContigsetName() {
+        return outputContigsetName;
     }
 
-    @JsonProperty("dna_source")
-    public void setDnaSource(java.lang.String dnaSource) {
-        this.dnaSource = dnaSource;
+    @JsonProperty("output_contigset_name")
+    public void setOutputContigsetName(java.lang.String outputContigsetName) {
+        this.outputContigsetName = outputContigsetName;
     }
 
-    public IDBAParams withDnaSource(java.lang.String dnaSource) {
-        this.dnaSource = dnaSource;
+    public IdbaUdParams withOutputContigsetName(java.lang.String outputContigsetName) {
+        this.outputContigsetName = outputContigsetName;
         return this;
     }
 
@@ -120,7 +99,7 @@ public class IDBAParams {
         this.minContigLen = minContigLen;
     }
 
-    public IDBAParams withMinContigLen(Long minContigLen) {
+    public IdbaUdParams withMinContigLen(Long minContigLen) {
         this.minContigLen = minContigLen;
         return this;
     }
@@ -137,7 +116,7 @@ public class IDBAParams {
 
     @Override
     public java.lang.String toString() {
-        return ((((((((((((("IDBAParams"+" [workspaceName=")+ workspaceName)+", outputContigsetName=")+ outputContigsetName)+", readLibraries=")+ readLibraries)+", dnaSource=")+ dnaSource)+", minContigLen=")+ minContigLen)+", additionalProperties=")+ additionalProperties)+"]");
+        return ((((((((((("IdbaUdParams"+" [workspaceName=")+ workspaceName)+", readLibraries=")+ readLibraries)+", outputContigsetName=")+ outputContigsetName)+", minContigLen=")+ minContigLen)+", additionalProperties=")+ additionalProperties)+"]");
     }
 
 }

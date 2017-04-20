@@ -33,31 +33,28 @@ class kb_IDBA(object):
             trust_all_ssl_certificates=trust_all_ssl_certificates,
             auth_svc=auth_svc)
 
-    def run_IDBA(self, params, context=None):
+    def run_idba_ud(self, params, context=None):
         """
         Run IDBA on paired end libraries
-        :param params: instance of type "IDBA_Params" (Input parameters for
-           running IDBA. string workspace_name - the name of the workspace
-           from which to take input and store output. string
-           output_contigset_name - the name of the output contigset
+        :param params: instance of type "idba_ud_Params" (Input parameters
+           for running idba_ud. string workspace_name - the name of the
+           workspace from which to take input and store output.
            list<paired_end_lib> read_libraries - Illumina PairedEndLibrary
-           files to assemble. string dna_source - the source of the DNA used
-           for sequencing 'single_cell': DNA amplified from a single cell via
-           MDA anything else: Standard DNA sample from multiple cells) ->
-           structure: parameter "workspace_name" of String, parameter
-           "output_contigset_name" of String, parameter "read_libraries" of
-           list of type "paired_end_lib" (The workspace object name of a
-           PairedEndLibrary file, whether of the KBaseAssembly or KBaseFile
-           type.), parameter "dna_source" of String, parameter
-           "min_contig_len" of Long
-        :returns: instance of type "IDBA_Output" (Output parameters for IDBA
-           run. string report_name - the name of the KBaseReport.Report
+           files to assemble. string output_contigset_name - the name of the
+           output contigset) -> structure: parameter "workspace_name" of
+           String, parameter "read_libraries" of list of type
+           "paired_end_lib" (The workspace object name of a PairedEndLibrary
+           file, whether of the KBaseAssembly or KBaseFile type.), parameter
+           "output_contigset_name" of String, parameter "min_contig_len" of
+           Long
+        :returns: instance of type "idba_ud_Output" (Output parameters for
+           IDBA run. string report_name - the name of the KBaseReport.Report
            workspace object. string report_ref - the workspace reference of
            the report.) -> structure: parameter "report_name" of String,
            parameter "report_ref" of String
         """
         return self._client.call_method(
-            'kb_IDBA.run_IDBA',
+            'kb_IDBA.run_idba_ud',
             [params], self._service_ver, context)
 
     def status(self, context=None):

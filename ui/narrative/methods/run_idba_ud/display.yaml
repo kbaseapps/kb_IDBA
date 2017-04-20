@@ -1,0 +1,71 @@
+#
+# define display information
+#
+name: Assemble with IDBA-UD
+tooltip: |
+    Assemble reads using the IDBA assembler.
+screenshots: []
+
+icon: IDBA.png
+
+#
+# define a set of similar methods that might be useful to the user
+#
+suggestions:
+    apps:
+        related:
+            []
+        next:
+            []
+    methods:
+        related:
+            []
+        next:
+            [annotate_contigset]
+
+#
+# Configure the display and description of parameters
+#
+parameters :
+    read_libraries :
+        ui-name : |
+            Read library
+        short-hint : |
+            The libraries of reads to be assembled
+    output_contigset_name :
+        ui-name : |
+            Output ContigSet
+        short-hint : |
+            The name under which the resulting ContigSet will be saved in the Narrative
+    min_contig_len :
+        ui-name : |
+            Minimum Contig Length
+        short-hint : |
+            The shortest contig to accept in the resulting assembly object
+description : |
+    <p>
+    This is a KBase wrapper for the
+    <a href="https://github.com/loneknightpy/idba" target="_blank">IDBA</a>
+    genomic reads assembler.
+    </p>
+
+    <p>
+    IDBA is designed for assembling short reads (around 100bp).
+    </p>
+    <p>
+    Operational notes:
+    <ul>
+        <li> Currently the wrapper only supports Illumina, IonTorrent, PacBIO CLR and PacBIO CCS
+             in FASTQ format, either uncompressed or gzipped.</li>
+    </ul>
+    If you need support for command line options not exposed in the wrapper
+    please contact KBase Help.
+    </p>
+    <p>IDBA version: 1.1.3</p>
+
+publications :
+    -
+        display-text: |
+            S. Nurk, A. Bankevich, D. Antipov, A. A. Gurevich, A. Korobeynikov, A. Lapidus, A. D. Prjibelsky, A. Pyshkin, A. Sirotkin, Y. Sirotkin, R. Stepanauskas, J. S. McLean, R. Lasken, S. R. Clingenpeel, T. Woyke, G. Tesler, M. A. Alekseyev, and P. A. Pevzner. Assembling Single-Cell Genomes and Mini-Metagenomes From Chimeric MDA Products. Journal of Computational Biology 20(10) (2013), 714-737. doi:10.1089/cmb.2013.0084
+        link: http://www.ncbi.nlm.nih.gov/pubmed/24093227
+        pmid: 24093227
