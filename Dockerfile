@@ -5,10 +5,9 @@ MAINTAINER KBase Developer
 # Insert apt-get instructions here to install
 # any required dependencies for your module.
 
-# RUN apt-get update
+#RUN apt-get update -y
 
-
-RUN sudo apt-get install python-dev libffi-dev libssl-dev
+RUN sudo apt-get install -y python-dev libffi-dev libssl-dev
 RUN pip install --upgrade pip
 RUN pip install cffi --upgrade
 RUN pip install pyopenssl --upgrade
@@ -18,9 +17,8 @@ RUN pip install pyasn1 --upgrade
 RUN pip install requests --upgrade \
     && pip install 'requests[security]' --upgrade \
     && pip install ipython \
-    && apt-get install nano \
-    && pip install psutil \
-    && pip install pyyaml
+    && apt-get install -y nano \
+    && pip install psutil
 
 # Install idba
 RUN cd /opt \
@@ -28,6 +26,7 @@ RUN cd /opt \
     && tar xvfz idba-1.1.3.tar.gz \
     && rm idba-1.1.3.tar.gz \
     && cd idba-1.1.3 \
+    && sed -i -- 's/kMaxShortSequence *= *[0-9][0-9]*/kMaxShortSequence = 512/' src/sequence/short_sequence.h \
     && ./configure \
     && make
 
