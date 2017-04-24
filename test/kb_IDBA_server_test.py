@@ -343,6 +343,27 @@ class kb_IDBATest(unittest.TestCase):
             )
 
 
+    def test_no_libs_list(self):
+
+        self.run_success(
+            'frbasic', 'frbasic_out_no_list',
+            {'contigs':
+             [{'name': 'contig-100_0',
+               'length': 64801,
+               'id': 'contig-100_0',
+               'md5': '18dc999687d91f0972e9c15360bb783b'
+               },
+              {'name': 'contig-100_1',
+               'length': 62656,
+               'id': 'contig-100_1',
+               'md5': '3cd5d6691bfb365e1c3f34a86ab8cc58'
+               }],
+             'md5': '14ede116f328ce83189c0b5d789d2bf1',
+             #'fasta_md5': '03a8b6fc00638dd176998e25e4a208b6'
+             }
+            )
+
+
     def test_no_workspace_param(self):
 
         self.run_error(
@@ -380,11 +401,6 @@ class kb_IDBATest(unittest.TestCase):
         self.run_error(None, 'read_libraries parameter is required')
 
 
-    def test_no_libs_list(self):
-
-        self.run_error('foo', 'read_libraries must be a list')
-
-
     def test_non_extant_lib(self):
 
         self.run_error(
@@ -404,16 +420,6 @@ class kb_IDBATest(unittest.TestCase):
         self.run_error(
             ['foo'], 'output_contigset_name parameter is required',
             output_name=None)
-
-
-    def test_bad_module(self):
-
-        self.run_error(['empty'],
-                       'Invalid type for object ' +
-                       self.staged['empty']['ref'] + ' (empty). Only the ' +
-                       'types KBaseAssembly.PairedEndLibrary and ' +
-                       'KBaseFile.PairedEndLibrary are supported')
-
 
     def run_error(self, readnames, error, wsname=('fake'), output_name='out',
                   dna_source=None, exception=ValueError):
@@ -456,7 +462,11 @@ class kb_IDBATest(unittest.TestCase):
         print("READNAMES: " + str(readnames))
         print("STAGED: " + str(self.staged))
 
-        libs = [self.staged[n]['info'][1] for n in readnames]
+        if type(readnames) != list:
+            libs = self.staged[readnames]['info'][1]
+        else:
+            libs = [self.staged[n]['info'][1] for n in readnames]
+
 #        assyrefs = sorted(
 #            [self.make_ref(self.staged[n]['info']) for n in readnames])
 

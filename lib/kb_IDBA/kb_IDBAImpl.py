@@ -36,8 +36,8 @@ class kb_IDBA:
 
     Module Description:
     A KBase module: kb_IDBA
-A simple wrapper for IDBA-UD Assembler
-https://github.com/loneknightpy/idba - Version 1.1.3
+    A simple wrapper for IDBA-UD Assembler
+    https://github.com/loneknightpy/idba - Version 1.1.3
     '''
 
     ######## WARNING FOR GEVENT USERS ####### noqa
@@ -269,6 +269,8 @@ https://github.com/loneknightpy/idba - Version 1.1.3
         if self.PARAM_IN_LIB not in params:
             raise ValueError(self.PARAM_IN_LIB + ' parameter is required')
         if type(params[self.PARAM_IN_LIB]) != list:
+            params[self.PARAM_IN_LIB] = [params[self.PARAM_IN_LIB]]
+        if type(params[self.PARAM_IN_LIB]) != list:
             raise ValueError(self.PARAM_IN_LIB + ' must be a list')
         if not params[self.PARAM_IN_LIB]:
             raise ValueError('At least one reads library must be provided')
@@ -331,9 +333,6 @@ https://github.com/loneknightpy/idba - Version 1.1.3
         self.log('Running run_idba_ud with params:\n' + pformat(params))
 
         token = ctx['token']
-
-        if type(params[self.PARAM_IN_LIB]) != list:
-            params[self.PARAM_IN_LIB] = [params[self.PARAM_IN_LIB]]
 
         # the reads should really be specified as a list of absolute ws refs
         # but the narrative doesn't do that yet
