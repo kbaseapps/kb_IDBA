@@ -140,11 +140,11 @@ class kb_IDBA:
             idba_ud_cmd.append('--min_contig')
             idba_ud_cmd.append(str(params_in['min_contig_arg']))
 
-        if 'mink_arg' in params_in and int(params_in['mink_arg']) >= 0:
+        if 'mink_arg' in params_in and int(params_in['mink_arg']) >= 1:
             idba_ud_cmd.append('--mink')
             idba_ud_cmd.append(str(params_in['mink_arg']))
 
-        if 'maxk_arg' in params_in and int(params_in['maxk_arg']) > 0:
+        if 'maxk_arg' in params_in and int(params_in['maxk_arg']) >= 2:
             idba_ud_cmd.append('--maxk')
             idba_ud_cmd.append(str(params_in['maxk_arg']))
 
