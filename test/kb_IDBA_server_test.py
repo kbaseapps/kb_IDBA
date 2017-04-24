@@ -18,13 +18,12 @@ from kb_IDBA.kb_IDBAServer import MethodContext
 from pprint import pprint
 import shutil
 import inspect
-from kb_IDBA.GenericClient import GenericClient
-
 
 class kb_IDBATest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
+
         cls.token = environ.get('KB_AUTH_TOKEN')
         cls.callbackURL = environ.get('SDK_CALLBACK_URL')
         print('CB URL: ' + cls.callbackURL)
@@ -311,10 +310,6 @@ class kb_IDBATest(unittest.TestCase):
         rev_reads = {'file': 'data/small.reverse.fq',
                      'name': 'test_rev.FQ',
                      'type': ''}
-        # get file type from shock node file name
-        int_reads = {'file': 'data/interleaved.fq',
-                     'name': '',
-                     'type': ''}
         cls.upload_reads('frbasic', {}, fwd_reads, rev_reads=rev_reads)
         cls.delete_shock_node(cls.nodes_to_delete.pop())
         cls.upload_empty_data('empty')
@@ -332,19 +327,20 @@ class kb_IDBATest(unittest.TestCase):
         self.run_success(
             ['frbasic'], 'frbasic_out',
             {'contigs':
-             [{'name': 'NODE_1_length_64822_cov_8.99582',
-               'length': 64822,
-               'id': 'NODE_1_length_64822_cov_8.99582',
-               'md5': '8a67351c7d6416039c6f613c31b10764'
+             [{'name': 'contig-100_0',
+               'length': 64801,
+               'id': 'contig-100_0',
+               'md5': '18dc999687d91f0972e9c15360bb783b'
                },
-              {'name': 'NODE_2_length_62656_cov_8.64322',
+              {'name': 'contig-100_1',
                'length': 62656,
-               'id': 'NODE_2_length_62656_cov_8.64322',
-               'md5': '8e7483c2223234aeff0c78f70b2e068a'
+               'id': 'contig-100_1',
+               'md5': '3cd5d6691bfb365e1c3f34a86ab8cc58'
                }],
-             'md5': '08d0b92ce7c0a5e346b3077436edaa42',
-             'fasta_md5': '03a8b6fc00638dd176998e25e4a208b6'
-             })
+             'md5': '14ede116f328ce83189c0b5d789d2bf1',
+             #'fasta_md5': '03a8b6fc00638dd176998e25e4a208b6'
+             }
+            )
 
 
     def test_no_workspace_param(self):
@@ -410,6 +406,15 @@ class kb_IDBATest(unittest.TestCase):
             output_name=None)
 
 
+    def test_bad_module(self):
+
+        self.run_error(['empty'],
+                       'Invalid type for object ' +
+                       self.staged['empty']['ref'] + ' (empty). Only the ' +
+                       'types KBaseAssembly.PairedEndLibrary and ' +
+                       'KBaseFile.PairedEndLibrary are supported')
+
+
     def run_error(self, readnames, error, wsname=('fake'), output_name='out',
                   dna_source=None, exception=ValueError):
 
@@ -433,23 +438,20 @@ class kb_IDBATest(unittest.TestCase):
         if (output_name is not None):
             params['output_contigset_name'] = output_name
 
-        if not (dna_source is None):
-            params['dna_source'] = dna_source
-
         with self.assertRaises(exception) as context:
             self.getImpl().run_idba_ud(self.ctx, params)
         self.assertEqual(error, str(context.exception.message))
 
 
-    def run_success(self, readnames, output_name, expected, contig_count=None,
-                    dna_source=None):
+    def run_success(self, readnames, output_name, expected, min_contig_arg=None,
+                    mink_arg=None, maxk_arg=None, step_arg=None):
 
         test_name = inspect.stack()[1][3]
         print('\n**** starting expected success test: ' + test_name + ' *****')
         print('   libs: ' + str(readnames))
 
-        if not contig_count:
-            contig_count = len(expected['contigs'])
+        # expected number of contigs in output
+        contig_count = len(expected['contigs'])
 
         print("READNAMES: " + str(readnames))
         print("STAGED: " + str(self.staged))
@@ -463,12 +465,21 @@ class kb_IDBATest(unittest.TestCase):
                   'output_contigset_name': output_name
                   }
 
-        if not (dna_source is None):
-            if dna_source == 'None':
-                params['dna_source'] = None
-            else:
-                params['dna_source'] = dna_source
+        if not (min_contig_arg is None):
+            params['min_contig_arg'] = min_contig_arg
 
+        if not (mink_arg is None):
+            params['mink_arg'] = mink_arg
+
+        if not (maxk_arg is None):
+            params['maxk_arg'] = maxk_arg
+
+        if not (step_arg is None):
+            params['step_arg'] = step_arg
+
+        print("PARAMS BEFORE CALLING ================== IDBA-UD")
+        pprint(params)
+        print("=============  END OF PARAMS TO  ================  IDBA-UD")
 
         ret = self.getImpl().run_idba_ud(self.ctx, params)[0]
 
@@ -533,7 +544,7 @@ class kb_IDBATest(unittest.TestCase):
         fasta_node = requests.get(self.shockURL + '/node/' + assembly_fasta_node,
                                   headers=header, allow_redirects=True).json()
 
-        ''' failing, check this ?????
+        ''' how to get fasta_md5 ?????
         self.assertEqual(expected['fasta_md5'],
                          fasta_node['data']['file']['checksum']['md5'])
         '''
@@ -541,8 +552,8 @@ class kb_IDBATest(unittest.TestCase):
         self.assertEqual(contig_count, len(assembly['data']['contigs']))
         self.assertEqual(output_name, assembly['data']['assembly_id'])
 
-        ''' failing, check this ?????
-        self.assertEqual(output_name, assembly['data']['name'])
+
+        #self.assertEqual(output_name, assembly['data']['name'])
         self.assertEqual(expected['md5'], assembly['data']['md5'])
 
         for exp_contig in expected['contigs']:
@@ -557,4 +568,4 @@ class kb_IDBATest(unittest.TestCase):
                 # Need to see them to update the tests accordingly.
                 # If code gets here this test is designed to always fail, but show results.
                 self.assertEqual(str(assembly['data']['contigs']),"BLAH")
-        '''
+

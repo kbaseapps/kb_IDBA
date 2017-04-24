@@ -13,7 +13,6 @@ import json
 import psutil
 import subprocess
 import numpy as np
-import yaml
 from ReadsUtils.ReadsUtilsClient import ReadsUtils  # @IgnorePep8
 from ReadsUtils.baseclient import ServerError
 from AssemblyUtil.AssemblyUtilClient import AssemblyUtil
@@ -48,8 +47,8 @@ https://github.com/loneknightpy/idba - Version 1.1.3
     # the latter method is running.
     ######################################### noqa
     VERSION = "0.0.1"
-    GIT_URL = ""
-    GIT_COMMIT_HASH = "75e7344947450fec45b467082ac5088bd16fd3b7"
+    GIT_URL = "https://github.com/uganapathy/kb_IDBA.git"
+    GIT_COMMIT_HASH = "5e4b96ee0c0bdc1ae463b5dea537a04a211cb351"
 
     #BEGIN_CLASS_HEADER
     # Class variables and functions can be defined in this block
@@ -59,10 +58,6 @@ https://github.com/loneknightpy/idba - Version 1.1.3
     PARAM_IN_WS = 'workspace_name'
     PARAM_IN_LIB = 'read_libraries'
     PARAM_IN_CS_NAME = 'output_contigset_name'
-    PARAM_IN_DNA_SOURCE = 'dna_source'
-    PARAM_IN_SINGLE_CELL = 'single_cell'
-    PARAM_IN_METAGENOME = 'metagenomic'
-    PARAM_IN_PLASMID = 'plasmid'
 
     INVALID_WS_OBJ_NAME_RE = re.compile('[^\\w\\|._-]')
     INVALID_WS_NAME_RE = re.compile('[^\\w:._-]')
@@ -74,74 +69,11 @@ https://github.com/loneknightpy/idba - Version 1.1.3
     TRUE = 'true'
     FALSE = 'false'
 
+    # code taken from kb_SPAdes
+
     def log(self, message, prefix_newline=False):
         print(('\n' if prefix_newline else '') +
               str(time.time()) + ': ' + str(message))
-
-
-    def check_shock_response(self, response, errtxt):
-        if not response.ok:
-            try:
-                err = json.loads(response.content)['error'][0]
-            except:
-                # this means shock is down or not responding.
-                self.log("Couldn't parse response error content from Shock: " +
-                         response.content)
-                response.raise_for_status()
-            raise ShockException(errtxt + str(err))
-
-
-    # Helper script borrowed from the transform service, logger removed
-    def upload_file_to_shock(self, file_path, token):
-        """
-        Use HTTP multi-part POST to save a file to a SHOCK instance.
-        """
-
-        if token is None:
-            raise Exception("Authentication token required!")
-
-        header = {'Authorization': "Oauth {0}".format(token)}
-
-        if file_path is None:
-            raise Exception("No file given for upload to SHOCK!")
-
-        with open(os.path.abspath(file_path), 'rb') as data_file:
-            files = {'upload': data_file}
-            response = requests.post(
-                self.shockURL + '/node', headers=header, files=files,
-                stream=True, allow_redirects=True)
-        self.check_shock_response(
-            response, ('Error trying to upload contig FASTA file {} to Shock: '
-                       ).format(file_path))
-        return response.json()['data']
-
-
-    # filter contigs file by length
-    #
-    def filter_contigs_file(self, contigs_file, min_contig_len):
-        new_contigs_file = os.path.join(os.path.dirname(contigs_file), 'metaIDBA_scaffolds.fna')
-        head = ''
-        seq = ''
-        with open(contigs_file, 'r') as file_R, \
-                open(new_contigs_file, 'w') as file_W:
-
-            for line in file_R:
-                if line.startswith('>'):
-                    if head != '':
-                        if len(seq) >= min_contig_len:
-                            file_W.write(head)
-                            file_W.write("\n".join(seq)+"\n")
-                    head = line
-                    seq = ''
-                else:
-                    seq += line.strip().replace(" ","")
-
-            if head != '':
-                if len(seq) >= min_contig_len:
-                    file_W.write(head)
-                    file_W.write("\n".join(seq)+"\n")
-
-        return new_contigs_file
 
 
     def exec_fq2fa(self, input_reads, outfile_fasta):
@@ -167,7 +99,7 @@ https://github.com/loneknightpy/idba - Version 1.1.3
                              str(retcode) + '\n')
 
 
-    def exec_idba_ud(self, reads_data):
+    def exec_idba_ud(self, reads_data, params_in):
 
         #threads = psutil.cpu_count() * self.THREADS_PER_CORE
 
@@ -186,17 +118,41 @@ https://github.com/loneknightpy/idba - Version 1.1.3
             raise ValueError(error_msg)
 
         print("LENGTH OF READSDATA IN EXEC: " + str(len(reads_data)))
-        print("READS DATA: " + str(reads_data))
+        print("READS DATA: ")
+        pprint(reads_data)
+        pprint("=============  END OF READS DATA  ===============")
 
         fq2fa_outfile = os.path.join(outdir, 'fq2fa-output.fasta')
 
+        # first convert input reads_data from fastq to fasta
+        # output fasta file saved in fq2fa_outfile
+
         self.exec_fq2fa(reads_data[0], fq2fa_outfile)
+
+        # use fq2fa_outfile as input to idba_ud assembler
+        # output files from the assembler saved in outdir
 
         idba_ud_cmd = ['idba_ud', '-r',
                        fq2fa_outfile,
                        '-o', outdir]
 
-        print("idba_ud CMD:" + str(idba_ud_cmd))
+        if 'min_contig_arg' in params_in and int(params_in['min_contig_arg']) > 0:
+            idba_ud_cmd.append('--min_contig')
+            idba_ud_cmd.append(str(params_in['min_contig_arg']))
+
+        if 'mink_arg' in params_in and int(params_in['mink_arg']) >= 0:
+            idba_ud_cmd.append('--mink')
+            idba_ud_cmd.append(str(params_in['mink_arg']))
+
+        if 'maxk_arg' in params_in and int(params_in['maxk_arg']) > 0:
+            idba_ud_cmd.append('--maxk')
+            idba_ud_cmd.append(str(params_in['maxk_arg']))
+
+        if 'step_arg' in params_in and int(params_in['step_arg']) > 0:
+            idba_ud_cmd.append('--step')
+            idba_ud_cmd.append(str(params_in['step_arg']))
+
+        print("\nidba_ud CMD:     " + str(idba_ud_cmd))
         self.log(idba_ud_cmd)
 
         if self.DISABLE_IDBA_OUTPUT:
@@ -326,14 +282,6 @@ https://github.com/loneknightpy/idba - Version 1.1.3
         if self.INVALID_WS_OBJ_NAME_RE.search(params[self.PARAM_IN_CS_NAME]):
             raise ValueError('Invalid workspace object name ' +
                              params[self.PARAM_IN_CS_NAME])
-        if self.PARAM_IN_DNA_SOURCE in params:
-            s = params[self.PARAM_IN_DNA_SOURCE]
-#            print("FOUND THE DNA SOURCE: " + str(params[self.PARAM_IN_DNA_SOURCE]))
-            if s not in [self.PARAM_IN_SINGLE_CELL, self.PARAM_IN_METAGENOME, self.PARAM_IN_PLASMID]:
-                params[self.PARAM_IN_DNA_SOURCE] = None
-        else:
-            params[self.PARAM_IN_DNA_SOURCE] = None
-#            print("PARAMS ARE:" + str(params))
 
     #END_CLASS_HEADER
 
@@ -383,6 +331,9 @@ https://github.com/loneknightpy/idba - Version 1.1.3
         self.log('Running run_idba_ud with params:\n' + pformat(params))
 
         token = ctx['token']
+
+        if type(params[self.PARAM_IN_LIB]) != list:
+            params[self.PARAM_IN_LIB] = [params[self.PARAM_IN_LIB]]
 
         # the reads should really be specified as a list of absolute ws refs
         # but the narrative doesn't do that yet
@@ -453,15 +404,11 @@ https://github.com/loneknightpy/idba - Version 1.1.3
         pprint(reads_data)
         print("============================   END OF READS_DATA: ")
 
-        idba_out = self.exec_idba_ud(reads_data)
+        idba_out = self.exec_idba_ud(reads_data, params)
         self.log('IDBA output dir: ' + idba_out)
 
         # parse the output and save back to KBase
         output_contigs = os.path.join(idba_out, 'contig.fa')
-
-        if 'min_contig_len' in params and int(params['min_contig_len']) > 0:
-            self.log ("Filtering out contigs with len < min_contig_len: "+str(params['min_contig_len']))
-            output_contigs = self.filter_contigs_file (output_contigs, int(params['min_contig_len']))
 
         self.log('Uploading FASTA file to Assembly')
         assemblyUtil = AssemblyUtil(self.callbackURL, token=ctx['token'], service_ver='dev')
@@ -484,6 +431,8 @@ https://github.com/loneknightpy/idba - Version 1.1.3
                              'output is not type dict as required.')
         # return the results
         return [output]
+
+
     def status(self, ctx):
         #BEGIN_STATUS
         returnVal = {'state': "OK",

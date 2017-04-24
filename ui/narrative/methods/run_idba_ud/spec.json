@@ -34,7 +34,7 @@
             }
         },
         {
-            "id": "min_contig_len",
+            "id": "min_contig_arg",
             "optional": false,
             "advanced": true,
             "allow_multiple": false,
@@ -42,7 +42,43 @@
             "field_type": "text",
             "text_options": {
                 "validate_as" : "int",
-		"min_int" : 200
+		    "min_int" : 200
+            }
+        },
+        {
+            "id": "mink_arg",
+            "optional": false,
+            "advanced": true,
+            "allow_multiple": false,
+            "default_values": [ "20" ],
+            "field_type": "text",
+            "text_options": {
+                "validate_as" : "int",
+		    "min_int" : 0
+            }
+        },
+        {
+            "id": "maxk_arg",
+            "optional": false,
+            "advanced": true,
+            "allow_multiple": false,
+            "default_values": [ "50" ],
+            "field_type": "text",
+            "text_options": {
+                "validate_as" : "int",
+		    "min_int" : 1
+            }
+        },
+        {
+            "id": "step_arg",
+            "optional": false,
+            "advanced": true,
+            "allow_multiple": false,
+            "default_values": [ "10" ],
+            "field_type": "text",
+            "text_options": {
+                "validate_as" : "int",
+		    "min_int" : 1
             }
         }
     ],
@@ -65,8 +101,20 @@
                     "target_property": "output_contigset_name"
                 },
                 {
-                    "input_parameter": "min_contig_len",
-                    "target_property": "min_contig_len"
+                    "input_parameter": "min_contig_arg",
+                    "target_property": "min_contig_arg"
+                },
+                {
+                    "input_parameter": "mink_arg",
+                    "target_property": "mink_arg"
+                },
+                {
+                    "input_parameter": "maxk_arg",
+                    "target_property": "maxk_arg"
+                },
+                {
+                    "input_parameter": "step_arg",
+                    "target_property": "step_arg"
                 }
             ],
             "output_mapping": [
