@@ -311,6 +311,7 @@ class kb_IDBATest(unittest.TestCase):
                      'name': 'test_rev.FQ',
                      'type': ''}
         cls.upload_reads('frbasic', {}, fwd_reads, rev_reads=rev_reads)
+
         cls.delete_shock_node(cls.nodes_to_delete.pop())
         cls.upload_empty_data('empty')
         print('Data staged.')
@@ -338,10 +339,9 @@ class kb_IDBATest(unittest.TestCase):
                'md5': '3cd5d6691bfb365e1c3f34a86ab8cc58'
                }],
              'md5': '14ede116f328ce83189c0b5d789d2bf1',
-             #'fasta_md5': '03a8b6fc00638dd176998e25e4a208b6'
-             }
-            )
-
+             'remote_md5': '7c56c8e5c8ad2fcde336828f181d42c6'
+             },
+            200, 20, 100, 20)
 
     def test_no_libs_list(self):
 
@@ -359,9 +359,9 @@ class kb_IDBATest(unittest.TestCase):
                'md5': '3cd5d6691bfb365e1c3f34a86ab8cc58'
                }],
              'md5': '14ede116f328ce83189c0b5d789d2bf1',
-             #'fasta_md5': '03a8b6fc00638dd176998e25e4a208b6'
-             }
-            )
+             'remote_md5': '7c56c8e5c8ad2fcde336828f181d42c6'
+             },
+            200, 20, 100, 20)
 
 
     def test_no_workspace_param(self):
@@ -390,12 +390,6 @@ class kb_IDBATest(unittest.TestCase):
             wsname='Ireallyhopethisworkspacedoesntexistorthistestwillfail',
             exception=WorkspaceError)
 
-    # TEST REMOVED SINCE FROM THE UI IT IS A REFERENCE (Old logic in Impl broke UI)
-    # def test_bad_lib_name(self):
-
-    #   self.run_error(['bad&name'], 'Invalid workspace object name bad&name')
-
-
     def test_no_libs_param(self):
 
         self.run_error(None, 'read_libraries parameter is required')
@@ -422,7 +416,7 @@ class kb_IDBATest(unittest.TestCase):
             output_name=None)
 
     def run_error(self, readnames, error, wsname=('fake'), output_name='out',
-                  dna_source=None, exception=ValueError):
+                  exception=ValueError):
 
         test_name = inspect.stack()[1][3]
         print('\n***** starting expected fail test: ' + test_name + ' *****')
@@ -467,9 +461,6 @@ class kb_IDBATest(unittest.TestCase):
         else:
             libs = [self.staged[n]['info'][1] for n in readnames]
 
-#        assyrefs = sorted(
-#            [self.make_ref(self.staged[n]['info']) for n in readnames])
-
         params = {'workspace_name': self.getWsName(),
                   'read_libraries': libs,
                   'output_contigset_name': output_name
@@ -508,18 +499,6 @@ class kb_IDBATest(unittest.TestCase):
         pprint(report['provenance'])
         print("====================   END OF PROVENANCE: ")
 
-        ''' failing, check this ?????
-        #self.assertEqual(1, len(report['provenance']))
-        '''
-
-        # PERHAPS ADD THESE TESTS BACK IN THE FUTURE, BUT AssemblyUtils and this
-        # would need to pass in the extra provenance information
-#        self.assertEqual(
-#            assyrefs, sorted(report['provenance'][0]['input_ws_objects']))
-#        self.assertEqual(
-#            assyrefs,
-#            sorted(report['provenance'][0]['resolved_ws_objects']))
-
         assembly_ref = report['data']['objects_created'][0]['ref']
         assembly = self.wsClient.get_objects([{'ref': assembly_ref}])[0]
         print("ASSEMBLY OBJECT:")
@@ -527,24 +506,8 @@ class kb_IDBATest(unittest.TestCase):
         print("===============  END OF ASSEMBLY OBJECT:")
         self.assertEqual('KBaseGenomeAnnotations.Assembly', assembly['info'][2].split('-')[0])
 
-        ''' failing, check this ?????
-        self.assertEqual(2, len(assembly['provenance']))
-        '''
-
-        # PERHAPS ADD THESE TESTS BACK IN THE FUTURE, BUT AssemblyUtils and this
-        # would need to pass in the extra provenance information
-#        self.assertEqual(
-#            assyrefs, sorted(assembly['provenance'][0]['input_ws_objects']))
-#        self.assertEqual(
-#            assyrefs, sorted(assembly['provenance'][0]['resolved_ws_objects']))
         self.assertEqual(output_name, assembly['info'][1])
 
-#        handle_id = assembly['data']['fasta_handle_ref']
-#        print("HANDLE ID:" + handle_id)
-#        handle_ids_list = list()
-#        handle_ids_list.append(handle_id)
-#        print("HANDLE IDS:" + str(handle_ids_list))
-#        temp_handle_info = self.hs.hids_to_handles(handle_ids_list)
         temp_handle_info = self.hs.hids_to_handles([assembly['data']['fasta_handle_ref']])
         print("HANDLE OBJECT:")
         pprint(temp_handle_info)
@@ -554,16 +517,12 @@ class kb_IDBATest(unittest.TestCase):
         fasta_node = requests.get(self.shockURL + '/node/' + assembly_fasta_node,
                                   headers=header, allow_redirects=True).json()
 
-        ''' how to get fasta_md5 ?????
-        self.assertEqual(expected['fasta_md5'],
+        self.assertEqual(expected['remote_md5'],
                          fasta_node['data']['file']['checksum']['md5'])
-        '''
 
         self.assertEqual(contig_count, len(assembly['data']['contigs']))
         self.assertEqual(output_name, assembly['data']['assembly_id'])
 
-
-        #self.assertEqual(output_name, assembly['data']['name'])
         self.assertEqual(expected['md5'], assembly['data']['md5'])
 
         for exp_contig in expected['contigs']:
