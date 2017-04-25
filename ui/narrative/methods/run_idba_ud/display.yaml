@@ -77,7 +77,7 @@ parameters :
 parameter-groups:
         kval_args :
                 ui-name : |
-                        k value options
+                        k value
                 short-hint : |
                         Min, max k values and increment of k-mer
                 long-hint : |

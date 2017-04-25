@@ -36,7 +36,7 @@
         {
             "id": "min_contig_arg",
             "optional": false,
-            "advanced": true,
+            "advanced": false,
             "allow_multiple": false,
             "default_values": [ "200" ],
             "field_type": "text",
