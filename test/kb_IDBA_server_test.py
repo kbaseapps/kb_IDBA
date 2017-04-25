@@ -8,9 +8,9 @@ from ConfigParser import ConfigParser
 import psutil
 
 import requests
-from biokbase.workspace.client import Workspace as workspaceService  # @UnresolvedImport @IgnorePep8
-from biokbase.workspace.client import ServerError as WorkspaceError  # @UnresolvedImport @IgnorePep8
-from biokbase.AbstractHandle.Client import AbstractHandle as HandleService  # @UnresolvedImport @IgnorePep8
+from biokbase.workspace.client import Workspace as workspaceService
+from biokbase.workspace.client import ServerError as WorkspaceError
+from biokbase.AbstractHandle.Client import AbstractHandle as HandleService
 from kb_IDBA.kb_IDBAImpl import kb_IDBA
 from ReadsUtils.baseclient import ServerError
 from ReadsUtils.ReadsUtilsClient import ReadsUtils
@@ -343,25 +343,26 @@ class kb_IDBATest(unittest.TestCase):
              },
             200, 20, 100, 20)
 
+
     def test_no_libs_list(self):
 
         self.run_success(
             'frbasic', 'frbasic_out_no_list',
             {'contigs':
-             [{'name': 'contig-100_0',
+             [{'name': 'contig-50_0',
                'length': 64801,
-               'id': 'contig-100_0',
+               'id': 'contig-50_0',
                'md5': '18dc999687d91f0972e9c15360bb783b'
                },
-              {'name': 'contig-100_1',
+              {'name': 'contig-50_1',
                'length': 62656,
-               'id': 'contig-100_1',
-               'md5': '3cd5d6691bfb365e1c3f34a86ab8cc58'
+               'id': 'contig-50_1',
+               'md5': '8e7483c2223234aeff0c78f70b2e068a'
                }],
-             'md5': '14ede116f328ce83189c0b5d789d2bf1',
-             'remote_md5': '7c56c8e5c8ad2fcde336828f181d42c6'
+             'md5': 'b88d6022333ba50dba8b41b529e4a986',
+             'remote_md5': 'c2362e9764a42e33a0ce6aa3824cdbb5'
              },
-            200, 20, 100, 20)
+            200, 20, 50, 10)
 
 
     def test_no_workspace_param(self):
@@ -456,6 +457,7 @@ class kb_IDBATest(unittest.TestCase):
         print("READNAMES: " + str(readnames))
         print("STAGED: " + str(self.staged))
 
+        # input reads:: both list and non-list accepted
         if type(readnames) != list:
             libs = self.staged[readnames]['info'][1]
         else:
@@ -466,6 +468,7 @@ class kb_IDBATest(unittest.TestCase):
                   'output_contigset_name': output_name
                   }
 
+        # add optional parameters
         if not (min_contig_arg is None):
             params['min_contig_arg'] = min_contig_arg
 
@@ -495,6 +498,7 @@ class kb_IDBATest(unittest.TestCase):
                          report['data']['objects_created'][0]['description'])
         self.assertIn('Assembled into ' + str(contig_count) +
                       ' contigs', report['data']['text_message'])
+
         print("PROVENANCE: ")
         pprint(report['provenance'])
         print("====================   END OF PROVENANCE: ")
