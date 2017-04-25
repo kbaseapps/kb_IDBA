@@ -7,13 +7,13 @@ import re
 import uuid
 from pprint import pformat
 from pprint import pprint
-from biokbase.workspace.client import Workspace as workspaceService  # @UnresolvedImport @IgnorePep8
+from biokbase.workspace.client import Workspace as workspaceService
 import requests
 import json
 import psutil
 import subprocess
 import numpy as np
-from ReadsUtils.ReadsUtilsClient import ReadsUtils  # @IgnorePep8
+from ReadsUtils.ReadsUtilsClient import ReadsUtils
 from ReadsUtils.baseclient import ServerError
 from AssemblyUtil.AssemblyUtilClient import AssemblyUtil
 from KBaseReport.KBaseReportClient import KBaseReport
@@ -76,8 +76,14 @@ class kb_IDBA:
               str(time.time()) + ': ' + str(message))
 
 
-    def exec_fq2fa(self, input_reads, outfile_fasta):
+    def exec_fq2fa(self, input_reads, outdir):
 
+        if not os.path.exists(outdir):
+            os.makedirs(outdir)
+
+        outfile_fasta = os.path.join(outdir, 'fq2fa-output.fasta')
+
+        # fq2fa command part of IDBA package
         fq2fa_cmd = ['fq2fa', '--merge', '--filter',
                       input_reads['fwd_file'],  input_reads['rev_file'],
                       outfile_fasta]
@@ -97,13 +103,13 @@ class kb_IDBA:
         if p.returncode != 0:
             raise ValueError('Error running fq2fa, return code: ' +
                              str(retcode) + '\n')
+        return outfile_fasta
 
 
-    def exec_idba_ud(self, reads_data, params_in):
+    def exec_idba_ud(self, reads_data, params_in, outdir):
 
         #threads = psutil.cpu_count() * self.THREADS_PER_CORE
 
-        outdir = os.path.join(self.scratch, 'IDBAoutput_dir')
         if not os.path.exists(outdir):
             os.makedirs(outdir)
 
@@ -122,19 +128,19 @@ class kb_IDBA:
         pprint(reads_data)
         pprint("=============  END OF READS DATA  ===============")
 
-        fq2fa_outfile = os.path.join(outdir, 'fq2fa-output.fasta')
-
         # first convert input reads_data from fastq to fasta
         # output fasta file saved in fq2fa_outfile
 
-        self.exec_fq2fa(reads_data[0], fq2fa_outfile)
+        fq2fa_outfile = self.exec_fq2fa(reads_data[0], outdir)
+
+        outdir_idba = os.path.join(outdir, 'IDBA_output')
 
         # use fq2fa_outfile as input to idba_ud assembler
         # output files from the assembler saved in outdir
 
         idba_ud_cmd = ['idba_ud', '-r',
                        fq2fa_outfile,
-                       '-o', outdir]
+                       '-o', outdir_idba]
 
         if 'min_contig_arg' in params_in and int(params_in['min_contig_arg']) > 0:
             idba_ud_cmd.append('--min_contig')
@@ -168,7 +174,7 @@ class kb_IDBA:
             raise ValueError('Error running IDBA, return code: ' +
                              str(retcode) + '\n')
 
-        return outdir
+        return outdir_idba
 
 
     # adapted from
@@ -403,7 +409,9 @@ class kb_IDBA:
         pprint(reads_data)
         print("============================   END OF READS_DATA: ")
 
-        idba_out = self.exec_idba_ud(reads_data, params)
+        outdir = os.path.join(self.scratch, 'IDBA_dir')
+
+        idba_out = self.exec_idba_ud(reads_data, params, outdir)
         self.log('IDBA output dir: ' + idba_out)
 
         # parse the output and save back to KBase
