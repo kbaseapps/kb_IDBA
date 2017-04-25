@@ -19,13 +19,17 @@ module kb_IDBA {
         string output_contigset_name - the name of the output contigset
     */
     typedef structure {
-        string workspace_name;
-        list<paired_end_lib> read_libraries;  /*  input reads  */
-        string output_contigset_name;         /*  name of output contigs */
         int mink_arg;                  /*  (=20)  minimum k value (<=124) */
-        int maxk_arg;                  /*  (=50)  maximum k value (<=124) */
-        int step_arg;                  /*  (=10)  increment of k-mer of each iteration  */
-        int min_contig_arg;            /*  (=200) minimum size of contig */
+        int maxk_arg;                  /*  (=100)  maximum k value (<=124) */
+        int step_arg;                  /*  (=20)  increment of k-mer of each iteration  */
+    } kval_args_type;
+
+    typedef structure {
+        string               workspace_name;
+        list<paired_end_lib> read_libraries;                /*  input reads  */
+        string               output_contigset_name;         /*  name of output contigs */
+        int                  min_contig_arg;                /*  (=200) minimum size of contig */
+        kval_args_type       kval_args;
     } idba_ud_Params;
     
     /* Output parameters for IDBA run.

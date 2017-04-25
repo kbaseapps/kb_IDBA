@@ -341,10 +341,11 @@ class kb_IDBATest(unittest.TestCase):
              'md5': '14ede116f328ce83189c0b5d789d2bf1',
              'remote_md5': '7c56c8e5c8ad2fcde336828f181d42c6'
              },
-            200, 20, 100, 20)
+            200,
+            {'mink_arg':20, 'maxk_arg':100, 'step_arg': 20} )
 
 
-    def test_no_libs_list(self):
+    def test_non_list_libs(self):
 
         self.run_success(
             'frbasic', 'frbasic_out_no_list',
@@ -362,8 +363,8 @@ class kb_IDBATest(unittest.TestCase):
              'md5': 'b88d6022333ba50dba8b41b529e4a986',
              'remote_md5': 'c2362e9764a42e33a0ce6aa3824cdbb5'
              },
-            200, 20, 50, 10)
-
+            200,
+            {'mink_arg': 10, 'maxk_arg': 50, 'step_arg': 10} )
 
     def test_no_workspace_param(self):
 
@@ -444,8 +445,7 @@ class kb_IDBATest(unittest.TestCase):
         self.assertEqual(error, str(context.exception.message))
 
 
-    def run_success(self, readnames, output_name, expected, min_contig_arg=None,
-                    mink_arg=None, maxk_arg=None, step_arg=None):
+    def run_success(self, readnames, output_name, expected, min_contig_arg=None, kval_args=None):
 
         test_name = inspect.stack()[1][3]
         print('\n**** starting expected success test: ' + test_name + ' *****')
@@ -465,21 +465,10 @@ class kb_IDBATest(unittest.TestCase):
 
         params = {'workspace_name': self.getWsName(),
                   'read_libraries': libs,
-                  'output_contigset_name': output_name
+                  'output_contigset_name': output_name,
+                  'min_contig_arg' : min_contig_arg,
+                  'kval_args': kval_args
                   }
-
-        # add optional parameters
-        if not (min_contig_arg is None):
-            params['min_contig_arg'] = min_contig_arg
-
-        if not (mink_arg is None):
-            params['mink_arg'] = mink_arg
-
-        if not (maxk_arg is None):
-            params['maxk_arg'] = maxk_arg
-
-        if not (step_arg is None):
-            params['step_arg'] = step_arg
 
         print("PARAMS BEFORE CALLING ================== IDBA-UD")
         pprint(params)

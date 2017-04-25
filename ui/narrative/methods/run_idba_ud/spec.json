@@ -82,7 +82,18 @@
             }
         }
     ],
-    "behavior": {
+
+    "parameter-groups": [
+	   {
+		"id": "kval_args",
+		"parameters": ["mink_arg", "maxk_arg", "step_arg"],
+	        "optional": true,
+		"allow_multiple": false,
+		"with_border": true
+	   }
+    ],
+
+   "behavior": {
         "service-mapping": {
             "url": "",
             "name": "kb_IDBA",
@@ -105,16 +116,8 @@
                     "target_property": "min_contig_arg"
                 },
                 {
-                    "input_parameter": "mink_arg",
-                    "target_property": "mink_arg"
-                },
-                {
-                    "input_parameter": "maxk_arg",
-                    "target_property": "maxk_arg"
-                },
-                {
-                    "input_parameter": "step_arg",
-                    "target_property": "step_arg"
+                    "input_parameter": "kval_args",
+                    "target_property": "kval_args"
                 }
             ],
             "output_mapping": [

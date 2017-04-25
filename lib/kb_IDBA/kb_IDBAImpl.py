@@ -146,17 +146,19 @@ class kb_IDBA:
             idba_ud_cmd.append('--min_contig')
             idba_ud_cmd.append(str(params_in['min_contig_arg']))
 
-        if 'mink_arg' in params_in and int(params_in['mink_arg']) >= 1:
-            idba_ud_cmd.append('--mink')
-            idba_ud_cmd.append(str(params_in['mink_arg']))
+        if 'kval_args' in params_in and params_in['kval_args'] is not None:
+            kargs = params_in['kval_args']
+            if int(kargs['mink_arg']) >= 1:
+                idba_ud_cmd.append('--mink')
+                idba_ud_cmd.append(str(kargs['mink_arg']))
 
-        if 'maxk_arg' in params_in and int(params_in['maxk_arg']) >= 2:
-            idba_ud_cmd.append('--maxk')
-            idba_ud_cmd.append(str(params_in['maxk_arg']))
+            if int(kargs['maxk_arg']) >= 2:
+                idba_ud_cmd.append('--maxk')
+                idba_ud_cmd.append(str(kargs['maxk_arg']))
 
-        if 'step_arg' in params_in and int(params_in['step_arg']) > 0:
-            idba_ud_cmd.append('--step')
-            idba_ud_cmd.append(str(params_in['step_arg']))
+            if int(kargs['step_arg']) > 0:
+                idba_ud_cmd.append('--step')
+                idba_ud_cmd.append(str(kargs['step_arg']))
 
         print("\nidba_ud CMD:     " + str(idba_ud_cmd))
         self.log(idba_ud_cmd)
@@ -334,6 +336,11 @@ class kb_IDBA:
         #BEGIN run_idba_ud
         
         print("===================  IN run_idba_ud")
+
+        print("PARAMS: ")
+        pprint(params)
+        print("============================   END OF PARAMS: ")
+
         # A whole lot of this is adapted or outright copied from
         # https://github.com/msneddon/MEGAHIT
         self.log('Running run_idba_ud with params:\n' + pformat(params))
