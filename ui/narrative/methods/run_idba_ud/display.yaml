@@ -31,9 +31,9 @@ parameters :
         ui-name : |
             Read library
         short-hint : |
-            The libraries of reads to be assembled
+            The libraries of reads to be assembled. Reads length should be <= 512.
         long-hint : |
-            The libraries of reads to be assembled
+            The libraries of reads to be assembled. Reads length should be <= 512.
     output_contigset_name :
         ui-name : |
             Output ContigSet
