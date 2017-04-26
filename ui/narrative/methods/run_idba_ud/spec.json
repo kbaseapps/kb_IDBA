@@ -35,8 +35,8 @@
         },
         {
             "id": "min_contig_arg",
-            "optional": false,
-            "advanced": false,
+            "optional": true,
+            "advanced": true,
             "allow_multiple": false,
             "default_values": [ "200" ],
             "field_type": "text",
@@ -54,7 +54,8 @@
             "field_type": "text",
             "text_options": {
                 "validate_as" : "int",
-		    "min_int" : 1
+		        "min_int" : 1,
+                "max_int" : 124
             }
         },
         {
@@ -66,7 +67,8 @@
             "field_type": "text",
             "text_options": {
                 "validate_as" : "int",
-		    "min_int" : 2
+		        "min_int" : 2,
+                "max_int" : 124
             }
         },
         {
@@ -78,7 +80,8 @@
             "field_type": "text",
             "text_options": {
                 "validate_as" : "int",
-		    "min_int" : 1
+		        "min_int" : 1,
+                "max_int" : 124
             }
         }
     ],
@@ -88,6 +91,7 @@
 		"id": "kval_args",
 		"parameters": ["mink_arg", "maxk_arg", "step_arg"],
 	        "optional": true,
+           "advanced": true,
 		"allow_multiple": false,
 		"with_border": true
 	   }
