@@ -6,7 +6,7 @@ tooltip: |
     Assemble reads using the IDBA assembler.
 screenshots: []
 
-icon: IDBA.png
+icon: idba-ud.png
 
 #
 # define a set of similar methods that might be useful to the user
