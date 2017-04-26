@@ -142,7 +142,7 @@ class kb_IDBA:
                        fq2fa_outfile,
                        '-o', outdir_idba]
 
-        if 'min_contig_arg' in params_in and int(params_in['min_contig_arg']) > 0:
+        if 'min_contig_arg' in params_in and int(params_in['min_contig_arg']) >= 0:
             idba_ud_cmd.append('--min_contig')
             idba_ud_cmd.append(str(params_in['min_contig_arg']))
 
