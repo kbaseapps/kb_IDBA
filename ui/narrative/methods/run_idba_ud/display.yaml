@@ -45,8 +45,6 @@ parameters :
         ui-name : |
             Minimum Contig Length
         short-hint : |
-            The shortest contig to accept in the resulting assembly object, should be less than largest ouput contig size
-        long-hint : |
             The shortest contig to accept in the resulting assembly object, should be less than largest output contig size
     mink_arg :
         ui-name : |
@@ -59,16 +57,16 @@ parameters :
         ui-name : |
             Maximum k value
         short-hint : |
-            Maximum k value (<=124), should be > min k
+            Maximum k value (<=124), should be > minimum k
         long-hint : |
-            Maximum k value (<=124), should be > min k
+            Maximum k value (<=124), should be > minimum k
     step_arg :
         ui-name : |
             Increment of k-mer
         short-hint : |
-            Increment of k-mer for each iteration, should be appropriate to min k and max k values
+            Increment of k-mer for each iteration, should be appropriate to minimum and maximum k values
         long-hint : |
-            Increment of k-mer for each iteration, should be appropriate to min k and max k values
+            Increment of k-mer for each iteration, should be appropriate to minimum and maximum k values
 
 
 #
