@@ -14,14 +14,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 /**
  * <p>Original spec-file type: idba_ud_Params</p>
- * <pre>
- * Input parameters for running idba_ud.
- * string workspace_name - the name of the workspace from which to take
- *    input and store output.
- * list<paired_end_lib> read_libraries - Illumina PairedEndLibrary files
- *     to assemble.
- * string output_contigset_name - the name of the output contigset
- * </pre>
+ * 
  * 
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -30,7 +23,8 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
     "workspace_name",
     "read_libraries",
     "output_contigset_name",
-    "min_contig_len"
+    "min_contig_arg",
+    "kval_args"
 })
 public class IdbaUdParams {
 
@@ -40,8 +34,22 @@ public class IdbaUdParams {
     private List<String> readLibraries;
     @JsonProperty("output_contigset_name")
     private java.lang.String outputContigsetName;
-    @JsonProperty("min_contig_len")
-    private Long minContigLen;
+    @JsonProperty("min_contig_arg")
+    private Long minContigArg;
+    /**
+     * <p>Original spec-file type: kval_args_type</p>
+     * <pre>
+     * Input parameters for running idba_ud.
+     * string workspace_name - the name of the workspace from which to take
+     *    input and store output.
+     * list<paired_end_lib> read_libraries - Illumina PairedEndLibrary files
+     *     to assemble.
+     * string output_contigset_name - the name of the output contigset
+     * </pre>
+     * 
+     */
+    @JsonProperty("kval_args")
+    private KvalArgsType kvalArgs;
     private Map<java.lang.String, Object> additionalProperties = new HashMap<java.lang.String, Object>();
 
     @JsonProperty("workspace_name")
@@ -89,18 +97,57 @@ public class IdbaUdParams {
         return this;
     }
 
-    @JsonProperty("min_contig_len")
-    public Long getMinContigLen() {
-        return minContigLen;
+    @JsonProperty("min_contig_arg")
+    public Long getMinContigArg() {
+        return minContigArg;
     }
 
-    @JsonProperty("min_contig_len")
-    public void setMinContigLen(Long minContigLen) {
-        this.minContigLen = minContigLen;
+    @JsonProperty("min_contig_arg")
+    public void setMinContigArg(Long minContigArg) {
+        this.minContigArg = minContigArg;
     }
 
-    public IdbaUdParams withMinContigLen(Long minContigLen) {
-        this.minContigLen = minContigLen;
+    public IdbaUdParams withMinContigArg(Long minContigArg) {
+        this.minContigArg = minContigArg;
+        return this;
+    }
+
+    /**
+     * <p>Original spec-file type: kval_args_type</p>
+     * <pre>
+     * Input parameters for running idba_ud.
+     * string workspace_name - the name of the workspace from which to take
+     *    input and store output.
+     * list<paired_end_lib> read_libraries - Illumina PairedEndLibrary files
+     *     to assemble.
+     * string output_contigset_name - the name of the output contigset
+     * </pre>
+     * 
+     */
+    @JsonProperty("kval_args")
+    public KvalArgsType getKvalArgs() {
+        return kvalArgs;
+    }
+
+    /**
+     * <p>Original spec-file type: kval_args_type</p>
+     * <pre>
+     * Input parameters for running idba_ud.
+     * string workspace_name - the name of the workspace from which to take
+     *    input and store output.
+     * list<paired_end_lib> read_libraries - Illumina PairedEndLibrary files
+     *     to assemble.
+     * string output_contigset_name - the name of the output contigset
+     * </pre>
+     * 
+     */
+    @JsonProperty("kval_args")
+    public void setKvalArgs(KvalArgsType kvalArgs) {
+        this.kvalArgs = kvalArgs;
+    }
+
+    public IdbaUdParams withKvalArgs(KvalArgsType kvalArgs) {
+        this.kvalArgs = kvalArgs;
         return this;
     }
 
@@ -116,7 +163,7 @@ public class IdbaUdParams {
 
     @Override
     public java.lang.String toString() {
-        return ((((((((((("IdbaUdParams"+" [workspaceName=")+ workspaceName)+", readLibraries=")+ readLibraries)+", outputContigsetName=")+ outputContigsetName)+", minContigLen=")+ minContigLen)+", additionalProperties=")+ additionalProperties)+"]");
+        return ((((((((((((("IdbaUdParams"+" [workspaceName=")+ workspaceName)+", readLibraries=")+ readLibraries)+", outputContigsetName=")+ outputContigsetName)+", minContigArg=")+ minContigArg)+", kvalArgs=")+ kvalArgs)+", additionalProperties=")+ additionalProperties)+"]");
     }
 
 }

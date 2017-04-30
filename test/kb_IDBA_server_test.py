@@ -12,11 +12,9 @@ from biokbase.workspace.client import Workspace as workspaceService
 from biokbase.workspace.client import ServerError as WorkspaceError
 from biokbase.AbstractHandle.Client import AbstractHandle as HandleService
 from kb_IDBA.kb_IDBAImpl import kb_IDBA
-from ReadsUtils.baseclient import ServerError
 from ReadsUtils.ReadsUtilsClient import ReadsUtils
 from kb_IDBA.kb_IDBAServer import MethodContext
 from pprint import pprint
-import shutil
 import inspect
 
 class kb_IDBATest(unittest.TestCase):
@@ -188,7 +186,7 @@ class kb_IDBATest(unittest.TestCase):
                                  'rev_handle_id': rev_handle_id
                                  }
 
-
+    '''
     @classmethod
     def upload_assembly(cls, wsobjname, object_body, fwd_reads,
                         rev_reads=None, kbase_assy=False,
@@ -278,7 +276,7 @@ class kb_IDBATest(unittest.TestCase):
                                  'fwd_handle_id': fwd_handle_id,
                                  'rev_handle_id': rev_handle_id
                                  }
-
+    '''
 
     @classmethod
     def upload_empty_data(cls, wsobjname):
@@ -343,28 +341,6 @@ class kb_IDBATest(unittest.TestCase):
              },
             200,
             {'mink_arg':20, 'maxk_arg':100, 'step_arg': 20} )
-
-
-    def test_non_list_libs(self):
-
-        self.run_success(
-            'frbasic', 'frbasic_out_no_list',
-            {'contigs':
-             [{'name': 'contig-50_0',
-               'length': 64801,
-               'id': 'contig-50_0',
-               'md5': '18dc999687d91f0972e9c15360bb783b'
-               },
-              {'name': 'contig-50_1',
-               'length': 62656,
-               'id': 'contig-50_1',
-               'md5': '8e7483c2223234aeff0c78f70b2e068a'
-               }],
-             'md5': 'b88d6022333ba50dba8b41b529e4a986',
-             'remote_md5': 'c2362e9764a42e33a0ce6aa3824cdbb5'
-             },
-            200,
-            {'mink_arg': 10, 'maxk_arg': 50, 'step_arg': 10} )
 
 
     def test_run_idba_ud_min_contigs(self):
@@ -475,11 +451,7 @@ class kb_IDBATest(unittest.TestCase):
         print("READNAMES: " + str(readnames))
         print("STAGED: " + str(self.staged))
 
-        # input reads:: both list and non-list accepted
-        if type(readnames) != list:
-            libs = self.staged[readnames]['info'][1]
-        else:
-            libs = [self.staged[n]['info'][1] for n in readnames]
+        libs = [self.staged[n]['info'][1] for n in readnames]
 
         params = {'workspace_name': self.getWsName(),
                   'read_libraries': libs,

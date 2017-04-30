@@ -20,7 +20,7 @@ from KBaseReport.KBaseReportClient import KBaseReport
 from KBaseReport.baseclient import ServerError as _RepError
 from kb_quast.kb_quastClient import kb_quast
 from kb_quast.baseclient import ServerError as QUASTError
-from kb_ea_utils.kb_ea_utilsClient import kb_ea_utils
+#from kb_ea_utils.kb_ea_utilsClient import kb_ea_utils
 import time
 
 class ShockException(Exception):
@@ -36,8 +36,8 @@ class kb_IDBA:
 
     Module Description:
     A KBase module: kb_IDBA
-    A simple wrapper for IDBA-UD Assembler
-    https://github.com/loneknightpy/idba - Version 1.1.3
+A simple wrapper for IDBA-UD Assembler
+https://github.com/loneknightpy/idba - Version 1.1.3
     '''
 
     ######## WARNING FOR GEVENT USERS ####### noqa
@@ -47,8 +47,8 @@ class kb_IDBA:
     # the latter method is running.
     ######################################### noqa
     VERSION = "0.0.1"
-    GIT_URL = "https://github.com/uganapathy/kb_IDBA.git"
-    GIT_COMMIT_HASH = "5e4b96ee0c0bdc1ae463b5dea537a04a211cb351"
+    GIT_URL = "https://github.com/ugswork/kb_IDBA.git"
+    GIT_COMMIT_HASH = "54d21adb84bb543791ddd496036b61a57eb33b05"
 
     #BEGIN_CLASS_HEADER
     # Class variables and functions can be defined in this block
@@ -58,6 +58,11 @@ class kb_IDBA:
     PARAM_IN_WS = 'workspace_name'
     PARAM_IN_LIB = 'read_libraries'
     PARAM_IN_CS_NAME = 'output_contigset_name'
+    PARAM_IN_MIN_CONTIG = 'min_contig_arg'
+    PARAM_IN_KVAL_ARGS = 'kval_args'
+    PARAM_IN_MIN_K_ARG = 'mink_arg'
+    PARAM_IN_MAX_K_ARG = 'maxk_arg'
+    PARAM_IN_STEP_ARG = 'step_arg'
 
     INVALID_WS_OBJ_NAME_RE = re.compile('[^\\w\\|._-]')
     INVALID_WS_NAME_RE = re.compile('[^\\w:._-]')
@@ -142,23 +147,23 @@ class kb_IDBA:
                        fq2fa_outfile,
                        '-o', outdir_idba]
 
-        if 'min_contig_arg' in params_in and int(params_in['min_contig_arg']) >= 0:
+        if self.PARAM_IN_MIN_CONTIG in params_in and int(params_in[self.PARAM_IN_MIN_CONTIG]) >= 0:
             idba_ud_cmd.append('--min_contig')
-            idba_ud_cmd.append(str(params_in['min_contig_arg']))
+            idba_ud_cmd.append(str(params_in[self.PARAM_IN_MIN_CONTIG]))
 
-        if 'kval_args' in params_in and params_in['kval_args'] is not None:
-            kargs = params_in['kval_args']
-            if int(kargs['mink_arg']) >= 1:
+        if self.PARAM_IN_KVAL_ARGS in params_in and params_in[self.PARAM_IN_KVAL_ARGS] is not None:
+            kargs = params_in[self.PARAM_IN_KVAL_ARGS]
+            if int(kargs[self.PARAM_IN_MIN_K_ARG]) >= 1:
                 idba_ud_cmd.append('--mink')
-                idba_ud_cmd.append(str(kargs['mink_arg']))
+                idba_ud_cmd.append(str(kargs[self.PARAM_IN_MIN_K_ARG]))
 
-            if int(kargs['maxk_arg']) >= 2:
+            if int(kargs[self.PARAM_IN_MAX_K_ARG]) >= 2:
                 idba_ud_cmd.append('--maxk')
-                idba_ud_cmd.append(str(kargs['maxk_arg']))
+                idba_ud_cmd.append(str(kargs[self.PARAM_IN_MAX_K_ARG]))
 
-            if int(kargs['step_arg']) > 0:
+            if int(kargs[self.PARAM_IN_STEP_ARG]) > 0:
                 idba_ud_cmd.append('--step')
-                idba_ud_cmd.append(str(kargs['step_arg']))
+                idba_ud_cmd.append(str(kargs[self.PARAM_IN_STEP_ARG]))
 
         print("\nidba_ud CMD:     " + str(idba_ud_cmd))
         self.log(idba_ud_cmd)
@@ -277,8 +282,6 @@ class kb_IDBA:
         if self.PARAM_IN_LIB not in params:
             raise ValueError(self.PARAM_IN_LIB + ' parameter is required')
         if type(params[self.PARAM_IN_LIB]) != list:
-            params[self.PARAM_IN_LIB] = [params[self.PARAM_IN_LIB]]
-        if type(params[self.PARAM_IN_LIB]) != list:
             raise ValueError(self.PARAM_IN_LIB + ' must be a list')
         if not params[self.PARAM_IN_LIB]:
             raise ValueError('At least one reads library must be provided')
@@ -292,6 +295,20 @@ class kb_IDBA:
         if self.INVALID_WS_OBJ_NAME_RE.search(params[self.PARAM_IN_CS_NAME]):
             raise ValueError('Invalid workspace object name ' +
                              params[self.PARAM_IN_CS_NAME])
+
+        if self.PARAM_IN_MIN_CONTIG in params:
+            if not isinstance(params[self.PARAM_IN_MIN_CONTIG], int):
+                raise ValueError('min_contig must be of type int')
+
+        if self.PARAM_IN_KVAL_ARGS in params and params[self.PARAM_IN_KVAL_ARGS] is not None:
+            oargs = params[self.PARAM_IN_KVAL_ARGS]
+            if not isinstance(oargs[self.PARAM_IN_MIN_K_ARG], int):
+                raise ValueError('min k value must be of type int')
+            if not isinstance(oargs[self.PARAM_IN_MAX_K_ARG], int):
+                raise ValueError('max k value must be of type int')
+            if not isinstance(oargs[self.PARAM_IN_STEP_ARG], int):
+                raise ValueError('step value must be of type int')
+
 
     #END_CLASS_HEADER
 
@@ -314,17 +331,19 @@ class kb_IDBA:
     def run_idba_ud(self, ctx, params):
         """
         Run IDBA on paired end libraries
-        :param params: instance of type "idba_ud_Params" (Input parameters
-           for running idba_ud. string workspace_name - the name of the
-           workspace from which to take input and store output.
-           list<paired_end_lib> read_libraries - Illumina PairedEndLibrary
-           files to assemble. string output_contigset_name - the name of the
-           output contigset) -> structure: parameter "workspace_name" of
-           String, parameter "read_libraries" of list of type
-           "paired_end_lib" (The workspace object name of a PairedEndLibrary
-           file, whether of the KBaseAssembly or KBaseFile type.), parameter
-           "output_contigset_name" of String, parameter "min_contig_len" of
-           Long
+        :param params: instance of type "idba_ud_Params" -> structure:
+           parameter "workspace_name" of String, parameter "read_libraries"
+           of list of type "paired_end_lib" (The workspace object name of a
+           PairedEndLibrary file, whether of the KBaseAssembly or KBaseFile
+           type.), parameter "output_contigset_name" of String, parameter
+           "min_contig_arg" of Long, parameter "kval_args" of type
+           "kval_args_type" (Input parameters for running idba_ud. string
+           workspace_name - the name of the workspace from which to take
+           input and store output. list<paired_end_lib> read_libraries -
+           Illumina PairedEndLibrary files to assemble. string
+           output_contigset_name - the name of the output contigset) ->
+           structure: parameter "mink_arg" of Long, parameter "maxk_arg" of
+           Long, parameter "step_arg" of Long
         :returns: instance of type "idba_ud_Output" (Output parameters for
            IDBA run. string report_name - the name of the KBaseReport.Report
            workspace object. string report_ref - the workspace reference of
@@ -445,8 +464,6 @@ class kb_IDBA:
                              'output is not type dict as required.')
         # return the results
         return [output]
-
-
     def status(self, ctx):
         #BEGIN_STATUS
         returnVal = {'state': "OK",

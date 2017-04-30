@@ -36,17 +36,19 @@ class kb_IDBA(object):
     def run_idba_ud(self, params, context=None):
         """
         Run IDBA on paired end libraries
-        :param params: instance of type "idba_ud_Params" (Input parameters
-           for running idba_ud. string workspace_name - the name of the
-           workspace from which to take input and store output.
-           list<paired_end_lib> read_libraries - Illumina PairedEndLibrary
-           files to assemble. string output_contigset_name - the name of the
-           output contigset) -> structure: parameter "workspace_name" of
-           String, parameter "read_libraries" of list of type
-           "paired_end_lib" (The workspace object name of a PairedEndLibrary
-           file, whether of the KBaseAssembly or KBaseFile type.), parameter
-           "output_contigset_name" of String, parameter "min_contig_len" of
-           Long
+        :param params: instance of type "idba_ud_Params" -> structure:
+           parameter "workspace_name" of String, parameter "read_libraries"
+           of list of type "paired_end_lib" (The workspace object name of a
+           PairedEndLibrary file, whether of the KBaseAssembly or KBaseFile
+           type.), parameter "output_contigset_name" of String, parameter
+           "min_contig_arg" of Long, parameter "kval_args" of type
+           "kval_args_type" (Input parameters for running idba_ud. string
+           workspace_name - the name of the workspace from which to take
+           input and store output. list<paired_end_lib> read_libraries -
+           Illumina PairedEndLibrary files to assemble. string
+           output_contigset_name - the name of the output contigset) ->
+           structure: parameter "mink_arg" of Long, parameter "maxk_arg" of
+           Long, parameter "step_arg" of Long
         :returns: instance of type "idba_ud_Output" (Output parameters for
            IDBA run. string report_name - the name of the KBaseReport.Report
            workspace object. string report_ref - the workspace reference of
