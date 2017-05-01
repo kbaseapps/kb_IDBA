@@ -308,8 +308,13 @@ class kb_IDBATest(unittest.TestCase):
         rev_reads = {'file': 'data/small.reverse.fq',
                      'name': 'test_rev.FQ',
                      'type': ''}
-        cls.upload_reads('frbasic', {}, fwd_reads, rev_reads=rev_reads)
+        int_reads = {'file': 'data/interleaved.fq',
+                     'name': '',
+                     'type': ''}
 
+        cls.upload_reads('frbasic', {}, fwd_reads, rev_reads=rev_reads)
+        cls.upload_reads('reads_out', {'read_orientation_outward': 1},
+                         int_reads)
         cls.delete_shock_node(cls.nodes_to_delete.pop())
         cls.upload_empty_data('empty')
         print('Data staged.')
@@ -411,8 +416,42 @@ class kb_IDBATest(unittest.TestCase):
             ['foo'], 'output_contigset_name parameter is required',
             output_name=None)
 
+    def test_invalid_min_contig_arg(self):
+
+        self.run_error(
+                ['foo'], 'min_contig must be of type int', wsname='fake', output_name='test-output',
+                       min_contig_len='not an int!', kval_args=None)
+
+
+    def test_invalid_mink_arg(self):
+
+        self.run_error(
+                ['foo'], 'min k value must be of type int', wsname='fake', output_name='test-output',
+                    min_contig_len=0, kval_args={'mink_arg': 'non int', 'maxk_arg': 0, 'step_arg': 0})
+
+    def test_invalid_maxk_arg(self):
+
+        self.run_error(
+                ['foo'], 'max k value must be of type int', wsname='fake', output_name='test-output',
+                    min_contig_len=0, kval_args={'mink_arg': 0, 'maxk_arg': 'non int', 'step_arg': 0})
+        
+    def test_invalid_step_arg(self):
+
+        self.run_error(
+                ['foo'], 'step value must be of type int', wsname='fake', output_name='test-output',
+                     min_contig_len=0, kval_args={'mink_arg': 0, 'maxk_arg': 0, 'step_arg': 'non int'})
+
+    def test_outward_reads(self):
+
+        self.run_error(
+            ['reads_out'],
+            'Reads object ' + self.getWsName() + '/reads_out (' +
+            self.staged['reads_out']['ref'] +
+            ') is marked as having outward oriented reads, which SPAdes ' +
+            'does not support.')
+
     def run_error(self, readnames, error, wsname=('fake'), output_name='out',
-                  exception=ValueError):
+                    min_contig_len=0, kval_args=None, exception=ValueError):
 
         test_name = inspect.stack()[1][3]
         print('\n***** starting expected fail test: ' + test_name + ' *****')
@@ -433,6 +472,9 @@ class kb_IDBATest(unittest.TestCase):
 
         if (output_name is not None):
             params['output_contigset_name'] = output_name
+
+        params['min_contig_arg'] = min_contig_len
+        params['kval_args'] = kval_args
 
         with self.assertRaises(exception) as context:
             self.getImpl().run_idba_ud(self.ctx, params)
@@ -489,6 +531,7 @@ class kb_IDBATest(unittest.TestCase):
         print("===============  END OF ASSEMBLY OBJECT:")
         self.assertEqual('KBaseGenomeAnnotations.Assembly', assembly['info'][2].split('-')[0])
 
+        self.assertEqual(1, len(assembly['provenance']))
         self.assertEqual(output_name, assembly['info'][1])
 
         temp_handle_info = self.hs.hids_to_handles([assembly['data']['fasta_handle_ref']])

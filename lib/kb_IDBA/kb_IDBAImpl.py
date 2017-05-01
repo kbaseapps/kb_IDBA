@@ -272,6 +272,20 @@ https://github.com/loneknightpy/idba - Version 1.1.3
             '/' + str(object_info[4])
 
 
+    def check_reads(self, reads, reftoname):
+
+        for ref in reads:
+            rds = reads[ref]
+            obj_name = reftoname[ref]
+            obj_ref = rds['ref']
+
+            if rds['read_orientation_outward'] == self.TRUE:
+                raise ValueError(
+                    ('Reads object {} ({}) is marked as having outward ' +
+                     'oriented reads, which SPAdes does not ' +
+                     'support.').format(obj_name, obj_ref))
+
+
     def process_params(self, params):
         if (self.PARAM_IN_WS not in params or
                 not params[self.PARAM_IN_WS]):
@@ -411,6 +425,7 @@ https://github.com/loneknightpy/idba - Version 1.1.3
 
         self.log('Got reads data from converter:\n' + pformat(reads))
 
+        self.check_reads(reads, reftoname)
 
         reads_data = []
         for ref in reads:
