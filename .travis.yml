@@ -1,6 +1,13 @@
-language: 
-env:
-before_install:
+language: java
+
+sudo: required
+
+services:
+  - docker
+
 install:
+  - sudo pip install nose2
+
 script:
-after_script:
+  - make
+  - make sdkbase
