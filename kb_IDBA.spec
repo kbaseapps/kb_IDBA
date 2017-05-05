@@ -30,6 +30,7 @@ module kb_IDBA {
         string               output_contigset_name;         /*  name of output contigs */
         int                  min_contig_arg;                /*  (=200) minimum size of contig */
         kval_args_type       kval_args;
+        list<string>         extra_params;
     } idba_ud_Params;
     
     /* Output parameters for IDBA run.

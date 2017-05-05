@@ -48,7 +48,7 @@ https://github.com/loneknightpy/idba - Version 1.1.3
     ######################################### noqa
     VERSION = "0.0.1"
     GIT_URL = "https://github.com/ugswork/kb_IDBA.git"
-    GIT_COMMIT_HASH = "54d21adb84bb543791ddd496036b61a57eb33b05"
+    GIT_COMMIT_HASH = "4e1f8cf3079e5de935e82afb57d268c9e8c71843"
 
     #BEGIN_CLASS_HEADER
     # Class variables and functions can be defined in this block
@@ -63,6 +63,7 @@ https://github.com/loneknightpy/idba - Version 1.1.3
     PARAM_IN_MIN_K_ARG = 'mink_arg'
     PARAM_IN_MAX_K_ARG = 'maxk_arg'
     PARAM_IN_STEP_ARG = 'step_arg'
+    PARAM_IN_EXTRA_PARAMS = 'extra_params'
 
     INVALID_WS_OBJ_NAME_RE = re.compile('[^\\w\\|._-]')
     INVALID_WS_NAME_RE = re.compile('[^\\w:._-]')
@@ -164,6 +165,10 @@ https://github.com/loneknightpy/idba - Version 1.1.3
             if int(kargs[self.PARAM_IN_STEP_ARG]) > 0:
                 idba_ud_cmd.append('--step')
                 idba_ud_cmd.append(str(kargs[self.PARAM_IN_STEP_ARG]))
+
+        if self.PARAM_IN_EXTRA_PARAMS in params_in and params_in[self.PARAM_IN_EXTRA_PARAMS]:
+            for ep in params_in[self.PARAM_IN_EXTRA_PARAMS]:
+                idba_ud_cmd.append(ep)
 
         print("\nidba_ud CMD:     " + str(idba_ud_cmd))
         self.log(idba_ud_cmd)
@@ -357,7 +362,8 @@ https://github.com/loneknightpy/idba - Version 1.1.3
            Illumina PairedEndLibrary files to assemble. string
            output_contigset_name - the name of the output contigset) ->
            structure: parameter "mink_arg" of Long, parameter "maxk_arg" of
-           Long, parameter "step_arg" of Long
+           Long, parameter "step_arg" of Long, parameter "extra_params" of
+           list of String
         :returns: instance of type "idba_ud_Output" (Output parameters for
            IDBA run. string report_name - the name of the KBaseReport.Report
            workspace object. string report_ref - the workspace reference of

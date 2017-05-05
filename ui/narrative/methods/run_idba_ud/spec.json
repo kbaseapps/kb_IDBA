@@ -83,6 +83,15 @@
 		        "min_int" : 1,
                 "max_int" : 124
             }
+        },
+        {
+            "id" : "extra_params",
+            "optional" : true,
+            "advanced" : true,
+            "allow_multiple" : true,
+            "default_values" : [ "" ],
+            "field_type" : "text",
+            "text_options" : { }
         }
     ],
 
@@ -123,6 +132,10 @@
                 {
                     "input_parameter": "kval_args",
                     "target_property": "kval_args"
+                },
+                {
+                    "input_parameter": "extra_params",
+                    "target_property": "extra_params"
                 }
             ],
             "output_mapping": [

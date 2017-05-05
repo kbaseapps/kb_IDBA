@@ -48,7 +48,8 @@ class kb_IDBA(object):
            Illumina PairedEndLibrary files to assemble. string
            output_contigset_name - the name of the output contigset) ->
            structure: parameter "mink_arg" of Long, parameter "maxk_arg" of
-           Long, parameter "step_arg" of Long
+           Long, parameter "step_arg" of Long, parameter "extra_params" of
+           list of String
         :returns: instance of type "idba_ud_Output" (Output parameters for
            IDBA run. string report_name - the name of the KBaseReport.Report
            workspace object. string report_ref - the workspace reference of

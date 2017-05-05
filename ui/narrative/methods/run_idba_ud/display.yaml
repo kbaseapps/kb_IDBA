@@ -67,7 +67,11 @@ parameters :
             Increment of k-mer for each iteration, should be appropriate to minimum and maximum k values
         long-hint : |
             Increment of k-mer for each iteration, should be appropriate to minimum and maximum k values
-
+    extra_params :
+        ui-name : |
+            Advanced assembly parameters
+        short-hint : |
+            Enter extra assembly parameters as strings
 
 #
 # Configure the display and description of parameters

@@ -217,7 +217,7 @@ class kb_IDBATest(unittest.TestCase):
             else:
                 wstype = 'KBaseAssembly.PairedEndLibrary'
                 ob['handle_1'] = fwd_handle
-        else:
+        else:Giving 
             if single_end:
                 wstype = 'KBaseFile.SingleEndLibrary'
                 obkey = 'lib'
