@@ -22,6 +22,7 @@ from kb_quast.kb_quastClient import kb_quast
 from kb_quast.baseclient import ServerError as QUASTError
 #from kb_ea_utils.kb_ea_utilsClient import kb_ea_utils
 import time
+from datetime import datetime
 
 class ShockException(Exception):
     pass
@@ -48,7 +49,7 @@ https://github.com/loneknightpy/idba - Version 1.1.3
     ######################################### noqa
     VERSION = "0.0.1"
     GIT_URL = "https://github.com/ugswork/kb_IDBA.git"
-    GIT_COMMIT_HASH = "4e1f8cf3079e5de935e82afb57d268c9e8c71843"
+    GIT_COMMIT_HASH = "231b0b79f6cc8a58b7ae026c87b5ddd92c60b406"
 
     #BEGIN_CLASS_HEADER
     # Class variables and functions can be defined in this block
@@ -456,7 +457,9 @@ https://github.com/loneknightpy/idba - Version 1.1.3
         pprint(reads_data)
         print("============================   END OF READS_DATA: ")
 
-        outdir = os.path.join(self.scratch, 'IDBA_dir')
+        # set the output location
+        timestamp = int((datetime.utcnow() - datetime.utcfromtimestamp(0)).total_seconds() * 1000)
+        outdir = os.path.join(self.scratch, 'IDBA_dir' + str(timestamp))
 
         idba_out = self.exec_idba_ud(reads_data, params, outdir)
         self.log('IDBA output dir: ' + idba_out)
