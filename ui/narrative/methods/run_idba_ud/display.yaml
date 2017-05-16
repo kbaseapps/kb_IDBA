@@ -1,7 +1,7 @@
 #
 # define display information
 #
-name: Assemble with IDBA-UD
+name: Assemble with IDBA-UD v1.1.3
 tooltip: |
     Assemble paired-end reads from single-cell or metagenomic sequencing technologies using the IDBA-UD assembler.
 screenshots: []
