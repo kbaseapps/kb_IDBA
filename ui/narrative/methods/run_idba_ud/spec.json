@@ -128,14 +128,6 @@
                 {
                     "input_parameter": "min_contig_arg",
                     "target_property": "min_contig_arg"
-                },
-                {
-                    "input_parameter": "kval_args",
-                    "target_property": "kval_args"
-                },
-                {
-                    "input_parameter": "extra_params",
-                    "target_property": "extra_params"
                 }
             ],
             "output_mapping": [
