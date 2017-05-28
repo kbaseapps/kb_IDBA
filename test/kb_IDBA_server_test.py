@@ -360,7 +360,7 @@ class kb_IDBATest(unittest.TestCase):
             ['reads_out'],
             'Reads object ' + self.getWsName() + '/reads_out (' +
             self.staged['reads_out']['ref'] +
-            ') is marked as having outward oriented reads, which SPAdes ' +
+            ') is marked as having outward oriented reads, which IDBA-UD ' +
             'does not support.')
 
 
@@ -453,10 +453,11 @@ class kb_IDBATest(unittest.TestCase):
         pprint(temp_handle_info)
         assembly_fasta_node = temp_handle_info[0]['id']
         self.nodes_to_delete.append(assembly_fasta_node)
-        header = {"Authorization": "Oauth {0}".format(self.token)}
 
         # the remote md5 happens to be different across runs
+
         '''
+        header = {"Authorization": "Oauth {0}".format(self.token)}
         fasta_node = requests.get(self.shockURL + '/node/' + assembly_fasta_node,
                                   headers=header, allow_redirects=True).json()
         self.assertEqual(expected['remote_md5'],
