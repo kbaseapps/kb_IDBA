@@ -153,7 +153,6 @@ class kb_IDBATest(unittest.TestCase):
 
         ob = dict(object_body)  # copy
         ob['sequencing_tech'] = sequencing_tech
-#        ob['single_genome'] = single_genome
         ob['wsname'] = cls.getWsName()
         ob['name'] = wsobjname
         if single_end or rev_reads:
@@ -186,97 +185,6 @@ class kb_IDBATest(unittest.TestCase):
                                  'rev_handle_id': rev_handle_id
                                  }
 
-    '''
-    @classmethod
-    def upload_assembly(cls, wsobjname, object_body, fwd_reads,
-                        rev_reads=None, kbase_assy=False,
-                        single_end=False, sequencing_tech='Illumina'):
-        if single_end and rev_reads:
-            raise ValueError('u r supr dum')
-
-        print('\n===============staging data for object ' + wsobjname +
-              '================')
-        print('uploading forward reads file ' + fwd_reads['file'])
-        fwd_id, fwd_handle_id, fwd_md5, fwd_size = \
-            cls.upload_file_to_shock_and_get_handle(fwd_reads['file'])
-        fwd_handle = {
-                      'hid': fwd_handle_id,
-                      'file_name': fwd_reads['name'],
-                      'id': fwd_id,
-                      'url': cls.shockURL,
-                      'type': 'shock',
-                      'remote_md5': fwd_md5
-                      }
-
-        ob = dict(object_body)  # copy
-        ob['sequencing_tech'] = sequencing_tech
-        if kbase_assy:
-            if single_end:
-                wstype = 'KBaseAssembly.SingleEndLibrary'
-                ob['handle'] = fwd_handle
-            else:
-                wstype = 'KBaseAssembly.PairedEndLibrary'
-                ob['handle_1'] = fwd_handle
-        else:Giving 
-            if single_end:
-                wstype = 'KBaseFile.SingleEndLibrary'
-                obkey = 'lib'
-            else:
-                wstype = 'KBaseFile.PairedEndLibrary'
-                obkey = 'lib1'
-            ob[obkey] = \
-                {'file': fwd_handle,
-                 'encoding': 'UTF8',
-                 'type': fwd_reads['type'],
-                 'size': fwd_size
-                 }
-
-        rev_id = None
-        rev_handle_id = None
-        if rev_reads:
-            print('uploading reverse reads file ' + rev_reads['file'])
-            rev_id, rev_handle_id, rev_md5, rev_size = \
-                cls.upload_file_to_shock_and_get_handle(rev_reads['file'])
-            rev_handle = {
-                          'hid': rev_handle_id,
-                          'file_name': rev_reads['name'],
-                          'id': rev_id,
-                          'url': cls.shockURL,
-                          'type': 'shock',
-                          'remote_md5': rev_md5
-                          }
-            if kbase_assy:
-                ob['handle_2'] = rev_handle
-            else:
-                ob['lib2'] = \
-                    {'file': rev_handle,
-                     'encoding': 'UTF8',
-                     'type': rev_reads['type'],
-                     'size': rev_size
-                     }
-
-        print('Saving object data')
-        objdata = cls.wsClient.save_objects({
-            'workspace': cls.getWsName(),
-            'objects': [
-                        {
-                         'type': wstype,
-                         'data': ob,
-                         'name': wsobjname
-                         }]
-            })[0]
-        print('Saved object objdata: ')
-        pprint(objdata)
-        print('Saved object ob: ')
-        pprint(ob)
-        cls.staged[wsobjname] = {'info': objdata,
-                                 'ref': cls.make_ref(objdata),
-                                 'fwd_node_id': fwd_id,
-                                 'rev_node_id': rev_id,
-                                 'fwd_handle_id': fwd_handle_id,
-                                 'rev_handle_id': rev_handle_id
-                                 }
-    '''
 
     @classmethod
     def upload_empty_data(cls, wsobjname):
@@ -391,6 +299,7 @@ class kb_IDBATest(unittest.TestCase):
             wsname='Ireallyhopethisworkspacedoesntexistorthistestwillfail',
             exception=WorkspaceError)
 
+
     def test_no_libs_param(self):
 
         self.run_error(None, 'read_libraries parameter is required')
@@ -416,6 +325,7 @@ class kb_IDBATest(unittest.TestCase):
             ['foo'], 'output_contigset_name parameter is required',
             output_name=None)
 
+
     def test_invalid_min_contig_arg(self):
 
         self.run_error(
@@ -429,17 +339,20 @@ class kb_IDBATest(unittest.TestCase):
                 ['foo'], 'min k value must be of type int', wsname='fake', output_name='test-output',
                     min_contig_len=0, kval_args={'mink_arg': 'non int', 'maxk_arg': 0, 'step_arg': 0})
 
+
     def test_invalid_maxk_arg(self):
 
         self.run_error(
                 ['foo'], 'max k value must be of type int', wsname='fake', output_name='test-output',
                     min_contig_len=0, kval_args={'mink_arg': 0, 'maxk_arg': 'non int', 'step_arg': 0})
         
+
     def test_invalid_step_arg(self):
 
         self.run_error(
                 ['foo'], 'step value must be of type int', wsname='fake', output_name='test-output',
                      min_contig_len=0, kval_args={'mink_arg': 0, 'maxk_arg': 0, 'step_arg': 'non int'})
+
 
     def test_outward_reads(self):
 
@@ -449,6 +362,7 @@ class kb_IDBATest(unittest.TestCase):
             self.staged['reads_out']['ref'] +
             ') is marked as having outward oriented reads, which SPAdes ' +
             'does not support.')
+
 
     def run_error(self, readnames, error, wsname=('fake'), output_name='out',
                     min_contig_len=0, kval_args=None, exception=ValueError):

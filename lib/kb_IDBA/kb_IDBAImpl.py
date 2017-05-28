@@ -8,19 +8,13 @@ import uuid
 from pprint import pformat
 from pprint import pprint
 from biokbase.workspace.client import Workspace as workspaceService
-import requests
-import json
-import psutil
 import subprocess
 import numpy as np
 from ReadsUtils.ReadsUtilsClient import ReadsUtils
 from ReadsUtils.baseclient import ServerError
 from AssemblyUtil.AssemblyUtilClient import AssemblyUtil
 from KBaseReport.KBaseReportClient import KBaseReport
-from KBaseReport.baseclient import ServerError as _RepError
 from kb_quast.kb_quastClient import kb_quast
-from kb_quast.baseclient import ServerError as QUASTError
-#from kb_ea_utils.kb_ea_utilsClient import kb_ea_utils
 import time
 from datetime import datetime
 
@@ -37,8 +31,8 @@ class kb_IDBA:
 
     Module Description:
     A KBase module: kb_IDBA
-A simple wrapper for IDBA-UD Assembler
-https://github.com/loneknightpy/idba - Version 1.1.3
+    A simple wrapper for IDBA-UD Assembler
+    https://github.com/loneknightpy/idba - Version 1.1.3
     '''
 
     ######## WARNING FOR GEVENT USERS ####### noqa
@@ -191,9 +185,12 @@ https://github.com/loneknightpy/idba - Version 1.1.3
 
 
     # adapted from
-    # https://github.com/kbase/transform/blob/master/plugins/scripts/convert/trns_transform_KBaseFile_AssemblyFile_to_KBaseGenomes_ContigSet.py
+    # https://github.com/kbase/transform/blob/master/plugins/scripts/convert/
+    # trns_transform_KBaseFile_AssemblyFile_to_KBaseGenomes_ContigSet.py
     # which was adapted from an early version of
-    # https://github.com/kbase/transform/blob/master/plugins/scripts/upload/trns_transform_FASTA_DNA_Assembly_to_KBaseGenomes_ContigSet.py
+    # https://github.com/kbase/transform/blob/master/plugins/scripts/upload/
+    # trns_transform_FASTA_DNA_Assembly_to_KBaseGenomes_ContigSet.py
+
     def load_stats(self, input_file_name):
         self.log('Starting conversion of FASTA to KBaseGenomeAnnotations.Assembly')
         self.log('Building Object.')
@@ -305,10 +302,6 @@ https://github.com/loneknightpy/idba - Version 1.1.3
             raise ValueError(self.PARAM_IN_LIB + ' must be a list')
         if not params[self.PARAM_IN_LIB]:
             raise ValueError('At least one reads library must be provided')
-        # for l in params[self.PARAM_IN_LIB]:
-        #    print("PARAM_IN_LIB : " + str(l))
-        #    if self.INVALID_WS_OBJ_NAME_RE.search(l):
-        #        raise ValueError('Invalid workspace object name ' + l)
         if (self.PARAM_IN_CS_NAME not in params or
                 not params[self.PARAM_IN_CS_NAME]):
             raise ValueError(self.PARAM_IN_CS_NAME + ' parameter is required')
