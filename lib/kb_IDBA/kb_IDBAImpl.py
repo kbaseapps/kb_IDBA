@@ -63,6 +63,8 @@ class kb_IDBA:
     INVALID_WS_OBJ_NAME_RE = re.compile('[^\\w\\|._-]')
     INVALID_WS_NAME_RE = re.compile('[^\\w:._-]')
 
+    THREADS_PER_CORE = 3
+
     URL_WS = 'workspace-url'
     URL_SHOCK = 'shock-url'
     URL_KB_END = 'kbase-endpoint'
@@ -110,6 +112,8 @@ class kb_IDBA:
 
     def exec_idba_ud(self, reads_data, params_in, outdir):
 
+        threads = psutil.cpu_count() * self.THREADS_PER_CORE
+
         if not os.path.exists(outdir):
             os.makedirs(outdir)
 
@@ -136,6 +140,7 @@ class kb_IDBA:
         # output files from the assembler saved in outdir
 
         idba_ud_cmd = ['idba_ud', '-r', fq2fa_outfile,
+                       '--num_threads', str(threads),
                        '-o', outdir_idba]
 
         if self.PARAM_IN_MIN_CONTIG in params_in and int(params_in[self.PARAM_IN_MIN_CONTIG]) >= 0:
