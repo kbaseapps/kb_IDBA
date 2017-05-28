@@ -24,8 +24,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
     "read_libraries",
     "output_contigset_name",
     "min_contig_arg",
-    "kval_args",
-    "extra_params"
+    "kval_args"
 })
 public class IdbaUdParams {
 
@@ -51,8 +50,6 @@ public class IdbaUdParams {
      */
     @JsonProperty("kval_args")
     private KvalArgsType kvalArgs;
-    @JsonProperty("extra_params")
-    private List<String> extraParams;
     private Map<java.lang.String, Object> additionalProperties = new HashMap<java.lang.String, Object>();
 
     @JsonProperty("workspace_name")
@@ -154,21 +151,6 @@ public class IdbaUdParams {
         return this;
     }
 
-    @JsonProperty("extra_params")
-    public List<String> getExtraParams() {
-        return extraParams;
-    }
-
-    @JsonProperty("extra_params")
-    public void setExtraParams(List<String> extraParams) {
-        this.extraParams = extraParams;
-    }
-
-    public IdbaUdParams withExtraParams(List<String> extraParams) {
-        this.extraParams = extraParams;
-        return this;
-    }
-
     @JsonAnyGetter
     public Map<java.lang.String, Object> getAdditionalProperties() {
         return this.additionalProperties;
@@ -181,7 +163,7 @@ public class IdbaUdParams {
 
     @Override
     public java.lang.String toString() {
-        return ((((((((((((((("IdbaUdParams"+" [workspaceName=")+ workspaceName)+", readLibraries=")+ readLibraries)+", outputContigsetName=")+ outputContigsetName)+", minContigArg=")+ minContigArg)+", kvalArgs=")+ kvalArgs)+", extraParams=")+ extraParams)+", additionalProperties=")+ additionalProperties)+"]");
+        return ((((((((((((("IdbaUdParams"+" [workspaceName=")+ workspaceName)+", readLibraries=")+ readLibraries)+", outputContigsetName=")+ outputContigsetName)+", minContigArg=")+ minContigArg)+", kvalArgs=")+ kvalArgs)+", additionalProperties=")+ additionalProperties)+"]");
     }
 
 }

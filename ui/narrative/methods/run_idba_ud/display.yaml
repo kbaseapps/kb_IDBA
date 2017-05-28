@@ -29,11 +29,11 @@ suggestions:
 parameters :
     read_libraries :
         ui-name : |
-            Read library
+            Reads library
         short-hint : |
-            The libraries of reads (length upto 500bp) to be assembled.
+            The libraries of reads (length upto 512bp) to be assembled
         long-hint : |
-            The libraries of reads (length upto 500bp) to be assembled.
+            The libraries of reads (length upto 512bp) to be assembled
     output_contigset_name :
         ui-name : |
             Output ContigSet

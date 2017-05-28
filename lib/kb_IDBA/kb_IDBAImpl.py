@@ -17,6 +17,7 @@ from KBaseReport.KBaseReportClient import KBaseReport
 from kb_quast.kb_quastClient import kb_quast
 import time
 from datetime import datetime
+import psutil
 
 class ShockException(Exception):
     pass
@@ -43,7 +44,7 @@ class kb_IDBA:
     ######################################### noqa
     VERSION = "0.0.1"
     GIT_URL = "https://github.com/ugswork/kb_IDBA.git"
-    GIT_COMMIT_HASH = "231b0b79f6cc8a58b7ae026c87b5ddd92c60b406"
+    GIT_COMMIT_HASH = "806fe155533f79ff95850ee9750107f004cf1f54"
 
     #BEGIN_CLASS_HEADER
     # Class variables and functions can be defined in this block
@@ -58,7 +59,6 @@ class kb_IDBA:
     PARAM_IN_MIN_K_ARG = 'mink_arg'
     PARAM_IN_MAX_K_ARG = 'maxk_arg'
     PARAM_IN_STEP_ARG = 'step_arg'
-    PARAM_IN_EXTRA_PARAMS = 'extra_params'
 
     INVALID_WS_OBJ_NAME_RE = re.compile('[^\\w\\|._-]')
     INVALID_WS_NAME_RE = re.compile('[^\\w:._-]')
@@ -98,6 +98,7 @@ class kb_IDBA:
                                      stdout=null)
         else:
             p = subprocess.Popen(fq2fa_cmd, cwd=self.scratch, shell=False)
+
         retcode = p.wait()
 
         self.log('Return code: ' + str(retcode))
@@ -108,8 +109,6 @@ class kb_IDBA:
 
 
     def exec_idba_ud(self, reads_data, params_in, outdir):
-
-        #threads = psutil.cpu_count() * self.THREADS_PER_CORE
 
         if not os.path.exists(outdir):
             os.makedirs(outdir)
@@ -125,9 +124,6 @@ class kb_IDBA:
             raise ValueError(error_msg)
 
         print("LENGTH OF READSDATA IN EXEC: " + str(len(reads_data)))
-        print("READS DATA: ")
-        pprint(reads_data)
-        pprint("=============  END OF READS DATA  ===============")
 
         # first convert input reads_data from fastq to fasta
         # output fasta file saved in fq2fa_outfile
@@ -139,8 +135,7 @@ class kb_IDBA:
         # use fq2fa_outfile as input to idba_ud assembler
         # output files from the assembler saved in outdir
 
-        idba_ud_cmd = ['idba_ud', '-r',
-                       fq2fa_outfile,
+        idba_ud_cmd = ['idba_ud', '-r', fq2fa_outfile,
                        '-o', outdir_idba]
 
         if self.PARAM_IN_MIN_CONTIG in params_in and int(params_in[self.PARAM_IN_MIN_CONTIG]) >= 0:
@@ -161,10 +156,6 @@ class kb_IDBA:
                 idba_ud_cmd.append('--step')
                 idba_ud_cmd.append(str(kargs[self.PARAM_IN_STEP_ARG]))
 
-        if self.PARAM_IN_EXTRA_PARAMS in params_in and params_in[self.PARAM_IN_EXTRA_PARAMS]:
-            for ep in params_in[self.PARAM_IN_EXTRA_PARAMS]:
-                idba_ud_cmd.append(ep)
-
         print("\nidba_ud CMD:     " + str(idba_ud_cmd))
         self.log(idba_ud_cmd)
 
@@ -174,6 +165,7 @@ class kb_IDBA:
                                      stdout=null)
         else:
             p = subprocess.Popen(idba_ud_cmd, cwd=self.scratch, shell=False)
+
         retcode = p.wait()
 
         self.log('Return code: ' + str(retcode))
@@ -285,7 +277,7 @@ class kb_IDBA:
             if rds['read_orientation_outward'] == self.TRUE:
                 raise ValueError(
                     ('Reads object {} ({}) is marked as having outward ' +
-                     'oriented reads, which SPAdes does not ' +
+                     'oriented reads, which IDBA-UD does not ' +
                      'support.').format(obj_name, obj_ref))
 
 
@@ -356,8 +348,7 @@ class kb_IDBA:
            Illumina PairedEndLibrary files to assemble. string
            output_contigset_name - the name of the output contigset) ->
            structure: parameter "mink_arg" of Long, parameter "maxk_arg" of
-           Long, parameter "step_arg" of Long, parameter "extra_params" of
-           list of String
+           Long, parameter "step_arg" of Long
         :returns: instance of type "idba_ud_Output" (Output parameters for
            IDBA run. string report_name - the name of the KBaseReport.Report
            workspace object. string report_ref - the workspace reference of
