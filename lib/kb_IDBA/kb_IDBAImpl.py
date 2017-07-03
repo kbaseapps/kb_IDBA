@@ -63,7 +63,7 @@ class kb_IDBA:
     INVALID_WS_OBJ_NAME_RE = re.compile('[^\\w\\|._-]')
     INVALID_WS_NAME_RE = re.compile('[^\\w:._-]')
 
-    THREADS_PER_CORE = 3
+    THREADS_PER_CORE = 1
 
     URL_WS = 'workspace-url'
     URL_SHOCK = 'shock-url'
@@ -441,10 +441,6 @@ class kb_IDBA:
                                    'seq_tech': seq_tech})
             else:
                 raise ValueError('Something is very wrong with read lib' + reads_name)
-
-        print("READS_DATA: ")
-        pprint(reads_data)
-        print("============================   END OF READS_DATA: ")
 
         # set the output location
         timestamp = int((datetime.utcnow() - datetime.utcfromtimestamp(0)).total_seconds() * 1000)
