@@ -4,7 +4,7 @@
         "umaganapathyswork"
     ],
     "contact": "help@kbase.us",
-    "categories": ["active", "assembly"],
+    "categories": ["active", "assembly", "communities"],
     "widgets": {
         "input": null,
         "output": "no-display"
