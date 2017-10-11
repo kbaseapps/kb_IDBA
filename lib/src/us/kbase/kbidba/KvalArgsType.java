@@ -14,12 +14,8 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 /**
  * <p>Original spec-file type: kval_args_type</p>
  * <pre>
- * Input parameters for running idba_ud.
- * string workspace_name - the name of the workspace from which to take
- *    input and store output.
- * list<paired_end_lib> read_libraries - Illumina PairedEndLibrary files
- *     to assemble.
- * string output_contigset_name - the name of the output contigset
+ * Additional parameters: k values for idba_ud.
+ * (Note: The UI elements for these values have been removed, based on feedback)
  * </pre>
  * 
  */

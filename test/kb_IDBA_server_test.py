@@ -326,32 +326,32 @@ class kb_IDBATest(unittest.TestCase):
             output_name=None)
 
 
-    def test_invalid_min_contig_arg(self):
+    def test_invalid_min_contig_length(self):
 
         self.run_error(
                 ['foo'], 'min_contig must be of type int', wsname='fake', output_name='test-output',
-                       min_contig_len='not an int!', kval_args=None)
+                       min_contig_length='not an int!', kval_args=None)
 
 
     def test_invalid_mink_arg(self):
 
         self.run_error(
                 ['foo'], 'min k value must be of type int', wsname='fake', output_name='test-output',
-                    min_contig_len=0, kval_args={'mink_arg': 'non int', 'maxk_arg': 0, 'step_arg': 0})
+                    min_contig_length=0, kval_args={'mink_arg': 'non int', 'maxk_arg': 0, 'step_arg': 0})
 
 
     def test_invalid_maxk_arg(self):
 
         self.run_error(
                 ['foo'], 'max k value must be of type int', wsname='fake', output_name='test-output',
-                    min_contig_len=0, kval_args={'mink_arg': 0, 'maxk_arg': 'non int', 'step_arg': 0})
+                    min_contig_length=0, kval_args={'mink_arg': 0, 'maxk_arg': 'non int', 'step_arg': 0})
         
 
     def test_invalid_step_arg(self):
 
         self.run_error(
                 ['foo'], 'step value must be of type int', wsname='fake', output_name='test-output',
-                     min_contig_len=0, kval_args={'mink_arg': 0, 'maxk_arg': 0, 'step_arg': 'non int'})
+                     min_contig_length=0, kval_args={'mink_arg': 0, 'maxk_arg': 0, 'step_arg': 'non int'})
 
 
     def test_outward_reads(self):
@@ -365,7 +365,7 @@ class kb_IDBATest(unittest.TestCase):
 
 
     def run_error(self, readnames, error, wsname=('fake'), output_name='out',
-                    min_contig_len=0, kval_args=None, exception=ValueError):
+                    min_contig_length=0, kval_args=None, exception=ValueError):
 
         test_name = inspect.stack()[1][3]
         print('\n***** starting expected fail test: ' + test_name + ' *****')
@@ -387,7 +387,7 @@ class kb_IDBATest(unittest.TestCase):
         if (output_name is not None):
             params['output_contigset_name'] = output_name
 
-        params['min_contig_arg'] = min_contig_len
+        params['min_contig_length'] = min_contig_length
         params['kval_args'] = kval_args
 
         with self.assertRaises(exception) as context:
@@ -395,7 +395,7 @@ class kb_IDBATest(unittest.TestCase):
         self.assertEqual(error, str(context.exception.message))
 
 
-    def run_success(self, readnames, output_name, expected, min_contig_arg=None, kval_args=None):
+    def run_success(self, readnames, output_name, expected, min_contig_length=None, kval_args=None):
 
         test_name = inspect.stack()[1][3]
         print('\n**** starting expected success test: ' + test_name + ' *****')
@@ -412,7 +412,7 @@ class kb_IDBATest(unittest.TestCase):
         params = {'workspace_name': self.getWsName(),
                   'read_libraries': libs,
                   'output_contigset_name': output_name,
-                  'min_contig_arg' : min_contig_arg,
+                  'min_contig_length' : min_contig_length,
                   'kval_args': kval_args
                   }
 

@@ -31,9 +31,8 @@ module kb_IDBA {
         string workspace_name - the name of the workspace from which to take input and store output.
         list<paired_end_lib> read_libraries - Illumina PairedEndLibrary files to assemble.
         string output_contigset_name - the name of the output contigset
-        min_contig_arg - minimum length of contigs to output, default is 200
+        min_contig_length - minimum length of contigs to output, default is 2000
 
-        @optional min_contig_arg
         @optional kval_args
     */
 
@@ -41,7 +40,7 @@ module kb_IDBA {
         string               workspace_name;
         list<paired_end_lib> read_libraries;          /*  input reads  */
         string               output_contigset_name;   /*  name of output contigs */
-        int                  min_contig_arg;          /*  minimum size of contig (default: 200) */
+        int                  min_contig_length;          /*  minimum size of contig (default: 2000) */
         kval_args_type       kval_args;               /*  additional parameters */
     } idba_ud_Params;
 
