@@ -41,7 +41,7 @@ install:
 - cd ../
 - git clone https://github.com/kbaseapps/kb_IDBA.git
 - cd kb_IDBA
-- kb-sdk test || true
+- kb-sdk validate || true
 - sed -i "s/test_token=/test_token=$TEST_TOKEN/" test_local/test.cfg
 - sed -i 's\https://appdev.kbase.us/services\https://ci.kbase.us/services\' test_local/test.cfg
 - sed -i 's\https://appdev.kbase.us/services/auth/api/legacy/KBase/Sessions/Login\https://ci.kbase.us/services/auth/api/legacy/KBase/Sessions/Login\'
@@ -55,7 +55,7 @@ install:
 - cat test_local/run_subjob.sh
 
 script:
-- kb-sdk test
+- kb-sdk validate
 
 after_success:
 - cp test_local/workdir/.coverage .
