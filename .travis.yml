@@ -1,68 +1,31 @@
 language: python
 
-python:
-- '2.7'
-
 sudo: required
 
 services:
-- docker
-
-notifications:
-  email:
-    recipients:
-    - umaganapathyswork@gmail.com
-    on_success: never
-    on_failure: always
-
-env:
-  global:
-    secure: sC6g8GYCi2+QB3VIkIFz12pbJsWH+3w6KooUHEhwiu2wpyneX4+JtwHOx/uuAH8WIOSmV3YEqQMFMVKiSwIzH7ik0jNjTTDpD0bBf4AcNkZ05PYG/5CcDFjsZVeTtz1pp1Sj/kI/TdUQtBHCE78P7CM6Y7g8KaaEnJRLJrkEQhQkjNHYLL54nG3k8oIywfFI3+OBG8E8N6/0yEg30/2psb2jRlwKQZuGfCk2zGjIqMNmmNW7BonXmPN/+QMx7Z+lqIZqZw/yXWx2/7VdWpgykYSyIxxjHeJPXz6F065gDXFai0ilsTXUZQZqC1RYFFpvpKpTr2Eh1POU+wDVjyxoLZAN4T5odAC1XeR9eAp09w3iOisQ/SfB0iuw49/feQdv0EleEkmeohP9eICnTPPdoKNhPPvWWsNi4Y4hEKLy/10cd5oTvFovO4tHfoy8rveHuXzSXBuIz2mvX5pF44GYGbHtVptqsYk04iGvYIn+ioQhYSBBWVHzs/8PDCqnVo1s0loBrCk4ltObonYpAN/qMF0PusSEc9UOwYkXIkCoABTYbPviOQebU3PNtl6+s7eFhk8fkn7S7b5zSrygr0TwiI/s3xezWtsJX9qvY3XkBt8SPHvJY6yD4D9B4ZYshwUadw7k1toUsishbtMsJfy0zLuTYENVPdeHDihzoPH/lPI=
+  - docker
 
 branches:
   only:
-  - master
+    - master
+
+env:
 
 before_install:
-- docker version
-- python --version
-- javac -version
-- java -version
+  - docker version
 
 install:
-- pip install coveralls
-- git clone https://github.com/kbase/jars
-- git clone https://github.com/kbase/kb_sdk
-- cd kb_sdk
-- make
-- make sdkbase
-- docker images
-- export PATH=$(pwd)/bin:$PATH
-- cd ../
-- git clone https://github.com/kbaseapps/kb_IDBA.git
-- cd kb_IDBA
-- kb-sdk test || true
-- sed -i "s/test_token=/test_token=$TEST_TOKEN/" test_local/test.cfg
-- sed -i 's\https://appdev.kbase.us/services\https://ci.kbase.us/services\' test_local/test.cfg
-- sed -i 's\https://appdev.kbase.us/services/auth/api/legacy/KBase/Sessions/Login\https://ci.kbase.us/services/auth/api/legacy/KBase/Sessions/Login\'
-  test_local/test.cfg
-- sed -i 's/$(id -u)/0:0/' test_local/run_tests.sh
-- pwd=$(pwd)
-- echo "#!/bin/bash" >> test_local/run_subjob.sh
-- echo -e "$pwd/test_local/run_docker.sh run --rm --user 0:0 -v $pwd/test_local/subjobs/\$1/workdir:/kb/module/work
-  -v $pwd/test_local/workdir/tmp:/kb/module/work/tmp \$4 -e \"SDK_CALLBACK_URL=\$3\"
-  \$2 async" >> test_local/run_subjob.sh
-- cat test_local/run_subjob.sh
+  - pushd ..
+  - git clone https://github.com/kbase/jars
+  - git clone https://github.com/kbase/kb_sdk
+  - cd kb_sdk
+  - make bin
+  - make sdkbase
+  - export PATH=$(pwd)/bin:$PATH
+  - source src/sh/sdk-completion.sh
+  - popd
 
 script:
-- kb-sdk test
+  - kb-sdk validate
 
-after_success:
-- cp test_local/workdir/.coverage .
-- sudo mkdir -p /kb/module/lib/
-- sudo cp -R test_local/workdir/kb/module/lib/kb_IDBA /kb/module/lib/
-- pwd
-- ls -l /kb/module/lib/kb_IDBA
-- cat .coverage
-- coverage report -m
-- coveralls
+after_script:

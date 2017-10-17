@@ -41,7 +41,7 @@ parameters :
             The name under which the resulting ContigSet will be saved in the Narrative
         long-hint : |
             The name under which the resulting ContigSet will be saved in the Narrative
-    min_contig_arg :
+    min_contig_length :
         ui-name : |
             Minimum Contig Length
         short-hint : |

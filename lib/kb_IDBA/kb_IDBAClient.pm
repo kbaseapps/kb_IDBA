@@ -127,7 +127,7 @@ idba_ud_Params is a reference to a hash where the following keys are defined:
 	workspace_name has a value which is a string
 	read_libraries has a value which is a reference to a list where each element is a kb_IDBA.paired_end_lib
 	output_contigset_name has a value which is a string
-	min_contig_arg has a value which is an int
+	min_contig_length has a value which is an int
 	kval_args has a value which is a kb_IDBA.kval_args_type
 paired_end_lib is a string
 kval_args_type is a reference to a hash where the following keys are defined:
@@ -150,7 +150,7 @@ idba_ud_Params is a reference to a hash where the following keys are defined:
 	workspace_name has a value which is a string
 	read_libraries has a value which is a reference to a list where each element is a kb_IDBA.paired_end_lib
 	output_contigset_name has a value which is a string
-	min_contig_arg has a value which is an int
+	min_contig_length has a value which is an int
 	kval_args has a value which is a kb_IDBA.kval_args_type
 paired_end_lib is a string
 kval_args_type is a reference to a hash where the following keys are defined:
@@ -347,12 +347,8 @@ a string
 
 =item Description
 
-Input parameters for running idba_ud.
-string workspace_name - the name of the workspace from which to take
-   input and store output.
-list<paired_end_lib> read_libraries - Illumina PairedEndLibrary files
-    to assemble.
-string output_contigset_name - the name of the output contigset
+Additional parameters: k values for idba_ud.
+(Note: The UI elements for these values have been removed, based on feedback)
 
 
 =item Definition
@@ -389,6 +385,18 @@ step_arg has a value which is an int
 
 
 
+=item Description
+
+Input parameters for running idba_ud.
+
+ string workspace_name - the name of the workspace from which to take input and store output.
+ list<paired_end_lib> read_libraries - Illumina PairedEndLibrary files to assemble.
+ string output_contigset_name - the name of the output contigset
+ min_contig_length - minimum length of contigs to output, default is 2000
+
+ @optional kval_args
+
+
 =item Definition
 
 =begin html
@@ -398,7 +406,7 @@ a reference to a hash where the following keys are defined:
 workspace_name has a value which is a string
 read_libraries has a value which is a reference to a list where each element is a kb_IDBA.paired_end_lib
 output_contigset_name has a value which is a string
-min_contig_arg has a value which is an int
+min_contig_length has a value which is an int
 kval_args has a value which is a kb_IDBA.kval_args_type
 
 </pre>
@@ -411,7 +419,7 @@ a reference to a hash where the following keys are defined:
 workspace_name has a value which is a string
 read_libraries has a value which is a reference to a list where each element is a kb_IDBA.paired_end_lib
 output_contigset_name has a value which is a string
-min_contig_arg has a value which is an int
+min_contig_length has a value which is an int
 kval_args has a value which is a kb_IDBA.kval_args_type
 
 
@@ -430,9 +438,9 @@ kval_args has a value which is a kb_IDBA.kval_args_type
 =item Description
 
 Output parameters for IDBA run.
-string report_name - the name of the KBaseReport.Report workspace
-    object.
-string report_ref - the workspace reference of the report.
+
+ string report_name - the name of the KBaseReport.Report workspace object.
+ string report_ref  - the workspace reference of the report.
 
 
 =item Definition
