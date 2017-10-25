@@ -319,7 +319,6 @@ https://github.com/loneknightpy/idba - Version 1.1.3
             if not isinstance(oargs[self.PARAM_IN_STEP_ARG], int):
                 raise ValueError('step value must be of type int')
 
-
     #END_CLASS_HEADER
 
     # config contains contents of config file in a hash or None if it couldn't
@@ -457,12 +456,21 @@ https://github.com/loneknightpy/idba - Version 1.1.3
 
         self.log('Uploading FASTA file to Assembly')
         assemblyUtil = AssemblyUtil(self.callbackURL, token=ctx['token'], service_ver='dev')
-        assemblyUtil.save_assembly_from_fasta({'file': {'path': output_contigs},
-                                               'workspace_name': wsname,
-                                               'assembly_name': params[self.PARAM_IN_CS_NAME]
+        if params.get('min_contig_length', 0) > 0:
+            assemblyUtil.save_assembly_from_fasta({'file': {'path': output_contigs},
+                                                   'workspace_name': wsname,
+                                                   'assembly_name': params[self.PARAM_IN_CS_NAME],
+                                                   'min_contig_length': params['min_contig_length']
                                                })
-
-        report_name, report_ref = self.load_report(output_contigs, params, wsname)
+            # load report from scaffolds.fasta
+            report_name, report_ref = self.load_report(output_contigs+'.filtered.fa', params, wsname)
+        else:
+            assemblyUtil.save_assembly_from_fasta({'file': {'path': output_contigs},
+                                                   'workspace_name': wsname,
+                                                   'assembly_name': params[self.PARAM_IN_CS_NAME]
+                                               })
+            # load report from scaffolds.fasta
+            report_name, report_ref = self.load_report(output_contigs, params, wsname)
 
         output = {'report_name': report_name,
                   'report_ref': report_ref
