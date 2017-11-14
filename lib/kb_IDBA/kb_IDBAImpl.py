@@ -42,8 +42,8 @@ https://github.com/loneknightpy/idba - Version 1.1.3
     # state. A method could easily clobber the state set by another while
     # the latter method is running.
     ######################################### noqa
-    VERSION = "1.0.0"
-    GIT_URL = "https://github.com/dcchivian/kb_IDBA"
+    VERSION = "1.0.1"
+    GIT_URL = "https://github.com/kbaseapps/kb_IDBA"
     GIT_COMMIT_HASH = "6e9c10dc082d1223abd18b3b4ac8771c43704695"
 
     #BEGIN_CLASS_HEADER
