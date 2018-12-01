@@ -72,5 +72,6 @@ description : |
 
 publications :
     -
-        display-text : |
-            Peng, Y., Leung, H. C. M., Yiu, S. M., Chin, F. Y. L. (2012) IDBA-UD: a de novo assembler for single-cell and metagenomic sequencing data with highly uneven depth. Bioinformatics, 28(11), 1420-1428, doi: 10.1093/bioinformatics/bts174
+        display-text: |
+            Peng Y, Leung HCM, Yiu SM, Chin FYL. IDBA-UD: a de novo assembler for single-cell and metagenomic sequencing data with highly uneven depth. Bioinformatics. 2012;28: 1420–1428. doi:10.1093/bioinformatics/bts174
+        link: https://academic.oup.com/bioinformatics/article/28/11/1420/266973

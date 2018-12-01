@@ -1,3 +1,7 @@
+### Version 1.0.2
+__Changes__
+- changed citation to PLOS format 
+
 ### Version 1.0.1
 __Changes__
 - changed contact from email to url
