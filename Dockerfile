@@ -1,24 +1,16 @@
-FROM kbase/kbase:sdkbase.latest
-MAINTAINER KBase Developer
+FROM kbase/kbase:sdkbase2.latest
+MAINTAINER KBase Developer [Dylan Chivian (DCChivian@lbl.gov)]
 # -----------------------------------------
 
 # Insert apt-get instructions here to install
 # any required dependencies for your module.
 
 #RUN apt-get update -y
-
-RUN sudo apt-get install -y python-dev libffi-dev libssl-dev
 RUN pip install --upgrade pip
-RUN pip install cffi --upgrade
-RUN pip install pyopenssl --upgrade
-RUN pip install ndg-httpsclient --upgrade
-RUN pip install pyasn1 --upgrade
 
-RUN pip install requests --upgrade \
-    && pip install 'requests[security]' --upgrade \
-    && pip install ipython \
-    && apt-get install -y nano \
-    && pip install psutil
+# IDBA needs psutil
+RUN pip install psutil
+
 
 # Install idba
 RUN cd /opt \

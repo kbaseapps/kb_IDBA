@@ -42,7 +42,7 @@ https://github.com/loneknightpy/idba - Version 1.1.3
     # state. A method could easily clobber the state set by another while
     # the latter method is running.
     ######################################### noqa
-    VERSION = "1.0.1"
+    VERSION = "1.0.3"
     GIT_URL = "https://github.com/kbaseapps/kb_IDBA"
     GIT_COMMIT_HASH = "6e9c10dc082d1223abd18b3b4ac8771c43704695"
 
@@ -112,7 +112,9 @@ https://github.com/loneknightpy/idba - Version 1.1.3
 
     def exec_idba_ud(self, reads_data, params_in, outdir):
 
-        threads = psutil.cpu_count() * self.THREADS_PER_CORE
+        # This caused too much contention on our workers - threads = psutil.cpu_count() * self.THREADS_PER_CORE
+        # Statically setting to 32 threads for now
+        threads = 32
 
         if not os.path.exists(outdir):
             os.makedirs(outdir)
