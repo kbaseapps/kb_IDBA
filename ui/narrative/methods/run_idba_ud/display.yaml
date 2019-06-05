@@ -1,7 +1,7 @@
 #
 # define display information
 #
-name: Assemble with IDBA-UD v1.1.3
+name: Assemble Reads with IDBA-UD - v1.1.3
 tooltip: |
     Assemble paired-end reads from single-cell or metagenomic sequencing technologies using the IDBA-UD assembler.
 screenshots: []
@@ -21,7 +21,7 @@ suggestions:
         related:
             []
         next:
-            [annotate_contigset]
+            []
 
 #
 # Configure the display and description of parameters
@@ -29,45 +29,26 @@ suggestions:
 parameters :
     read_libraries :
         ui-name : |
-            Reads library
+            Reads Library
         short-hint : |
-            The libraries of reads (length upto 512bp) to be assembled
-        long-hint : |
-            The libraries of reads (length upto 512bp) to be assembled
+            The paired-end reads to be assembed.
     output_contigset_name :
         ui-name : |
-            Output ContigSet
+            Output Assembly
         short-hint : |
-            The name under which the resulting ContigSet will be saved in the Narrative
-        long-hint : |
-            The name under which the resulting ContigSet will be saved in the Narrative
+            Provide a name for the output Assembly object.
     min_contig_length :
         ui-name : |
             Minimum Contig Length
         short-hint : |
-            The shortest contig to accept in the resulting assembly object, should be less than largest output contig size
+            The shortest contig produced in the resulting Assembly.
 
 
 description : |
-    <p>
-    This is a KBase wrapper for the
-    <a href="https://github.com/loneknightpy/idba" target="_blank">IDBA</a>
-    genomic reads assembler.
-    </p>
+    <p>This is a KBase wrapper for the <a href="https://github.com/loneknightpy/idba" target="_blank">IDBA</a> short read assembler.</p>
 
-    <p>
-    IDBA-UD is an iterative graph-based assembler for single-cell and standard short read data.
-    IDBA-UD is an extension of IDBA algorithm and is good for data of highly uneven sequencing depth.
-    In its assembly process, IDBA-UD iterates from small k to a large k. In each iteration, short and
-    low-depth contigs are removed iteratively with cutoff threshold from low to high to reduce the errors
-    in low-depth and high-depth regions. This iterative approach compensates for the information loss with
-    de bruijn graphs constructed using a single kmer length. For this reason, IDBA-UD is considered one of
-    the more accurate microbial assemblers.
-    </p>
-    <p>
-    <b>Known limitations:</b> IDBA-UD only works with paired-end reads, as they are are aligned to contigs
-    and assembled locally to generate some missing k-mers in low-depth regions.
-    </p>
+    <p>IDBA-UD is an iterative graph-based assembler for single-cell and standard metagenomic short reads. IDBA-UD is an extension of IDBA algorithm and is good for data of highly uneven sequencing depth. In its assembly process, IDBA-UD iterates from a small <i>k</i> to a large <i>k</i>. In each iteration, short and low-depth contigs are removed using depth-relative cutoff thresholds, from low to high, to reduce the errors in low-depth and high-depth regions. This iterative approach compensates for the information loss with de Bruijn graphs constructed using a single kmer length. The reads are assembled locally to generate some missing k-mers in low-depth regions. For this reason, IDBA-UD is considered one of the more accurate microbial assemblers. IDBA-UD takes paired-end reads as input and generates an Assembly object as output.</p>
+
     <p>IDBA version: 1.1.3.</p>
 
 publications :
