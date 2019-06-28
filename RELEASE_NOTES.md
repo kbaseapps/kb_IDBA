@@ -1,3 +1,7 @@
+### Version 1.0.4
+__Changes__
+- updated docs
+
 ### Version 1.0.3
 __Changes__
 - updated base image to sdkbase2
