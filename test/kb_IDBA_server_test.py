@@ -1,16 +1,19 @@
-from __future__ import print_function
 import unittest
 import os
 import time
+import shutil
+import uuid
 
 from os import environ
-from ConfigParser import ConfigParser
+from configparser import ConfigParser
+from pathlib import Path
 import psutil
 
 import requests
-from biokbase.workspace.client import Workspace as workspaceService
-from biokbase.workspace.client import ServerError as WorkspaceError
-from biokbase.AbstractHandle.Client import AbstractHandle as HandleService
+from installed_clients.WorkspaceClient import Workspace as workspaceService
+from installed_clients.DataFileUtilClient import DataFileUtil
+from installed_clients.baseclient import ServerError
+from installed_clients.AbstractHandleClient import AbstractHandle as HandleService
 from kb_IDBA.kb_IDBAImpl import kb_IDBA
 from ReadsUtils.ReadsUtilsClient import ReadsUtils
 from kb_IDBA.kb_IDBAServer import MethodContext
@@ -43,8 +46,9 @@ class kb_IDBATest(unittest.TestCase):
             cls.cfg[nameval[0]] = nameval[1]
         cls.wsURL = cls.cfg['workspace-url']
         cls.shockURL = cls.cfg['shock-url']
-        cls.hs = HandleService(url=cls.cfg['handle-service-url'],
-                               token=cls.token)
+        cls.hsURL = cls.cfg['handle-service-url']
+        cls.dfu = DataFileUtil(cls.callbackURL, token=cls.token)
+        cls.hs = HandleService(url=cls.hsURL, token=cls.token)
         cls.wsClient = workspaceService(cls.wsURL, token=cls.token)
         wssuffix = int(time.time() * 1000)
         wsName = "test_kb_IDBA" + str(wssuffix)
@@ -71,7 +75,8 @@ class kb_IDBATest(unittest.TestCase):
             for node in cls.nodes_to_delete:
                 cls.delete_shock_node(node)
         if hasattr(cls, 'handles_to_delete'):
-            cls.hs.delete_handles(cls.hs.ids_to_handles(cls.handles_to_delete))
+            handles = cls.hs.hids_to_handles(cls.handles_to_delete)
+            cls.hs.delete_handles(handles)
             print('Deleted handles ' + str(cls.handles_to_delete))
 
 
@@ -91,59 +96,19 @@ class kb_IDBATest(unittest.TestCase):
                         allow_redirects=True)
         print('Deleted shock node ' + node_id)
 
-
-    # Helper script borrowed from the transform service, logger removed
     @classmethod
-    def upload_file_to_shock(cls, file_path):
-        """
-        Use HTTP multi-part POST to save a file to a SHOCK instance.
-        """
-
-        header = dict()
-        header["Authorization"] = "Oauth {0}".format(cls.token)
-
-        if file_path is None:
-            raise Exception("No file given for upload to SHOCK!")
-
-        with open(os.path.abspath(file_path), 'rb') as dataFile:
-            files = {'upload': dataFile}
-            print('POSTing data')
-            response = requests.post(
-                cls.shockURL + '/node', headers=header, files=files,
-                stream=True, allow_redirects=True)
-            print('got response')
-
-        if not response.ok:
-            response.raise_for_status()
-
-        result = response.json()
-
-        if result['error']:
-            raise Exception(result['error'][0])
-        else:
-            return result["data"]
-
-
-    @classmethod
-    def upload_file_to_shock_and_get_handle(cls, test_file):
+    def upload_file_to_blobstore_and_get_handle(cls, test_file):
         '''
-        Uploads the file in test_file to shock and returns the node and a
+        Uploads the file in test_file to the blobstore and returns the node and a
         handle to the node.
         '''
-        print('loading file to shock: ' + test_file)
-        node = cls.upload_file_to_shock(test_file)
-        pprint(node)
-        cls.nodes_to_delete.append(node['id'])
-
-        print('creating handle for shock id ' + node['id'])
-        handle_id = cls.hs.persist_handle({'id': node['id'],
-                                           'type': 'shock',
-                                           'url': cls.shockURL
-                                           })
+        print(f'loading file to blobstore: {test_file}')
+        res = cls.dfu.file_to_shock({'file_path': str(test_file), 'make_handle': 1})
+        node_id = res["shock_id"]
+        handle_id = res["handle"]["hid"]
+        cls.nodes_to_delete.append(node_id)
         cls.handles_to_delete.append(handle_id)
-
-        md5 = node['file']['checksum']['md5']
-        return node['id'], handle_id, md5, node['file']['size']
+        return node_id, handle_id
 
 
     @classmethod
@@ -161,17 +126,15 @@ class kb_IDBATest(unittest.TestCase):
             ob['interleaved']= 1
         print('\n===============staging data for object ' + wsobjname +
               '================')
-        print('uploading forward reads file ' + fwd_reads['file'])
-        fwd_id, fwd_handle_id, fwd_md5, fwd_size = \
-            cls.upload_file_to_shock_and_get_handle(fwd_reads['file'])
+        print(f"uploading forward reads file {fwd_reads['file']}")
+        fwd_id, fwd_handle_id = cls.upload_file_to_blobstore_and_get_handle(fwd_reads['file'])
 
         ob['fwd_id']= fwd_id
         rev_id = None
         rev_handle_id = None
         if rev_reads:
-            print('uploading reverse reads file ' + rev_reads['file'])
-            rev_id, rev_handle_id, rev_md5, rev_size = \
-                cls.upload_file_to_shock_and_get_handle(rev_reads['file'])
+            print(f"uploading reverse reads file {rev_reads['file']}")
+            rev_id, rev_handle_id = cls.upload_file_to_blobstore_and_get_handle(rev_reads['file'])
             ob['rev_id']= rev_id
         obj_ref = cls.readUtilsImpl.upload_reads(ob)
         objdata = cls.wsClient.get_object_info_new({
@@ -203,20 +166,26 @@ class kb_IDBATest(unittest.TestCase):
     @classmethod
     def setupTestData(cls):
         print('Shock url ' + cls.shockURL)
-        print('WS url ' + cls.wsClient.url)
-        print('Handle service url ' + cls.hs.url)
+        print('WS url ' + cls.wsURL)
+        print('Handle service url ' + cls.hsURL)
         print('CPUs detected ' + str(psutil.cpu_count()))
         print('Available memory ' + str(psutil.virtual_memory().available))
         print('staging data')
+        # move test data to scratch space so DFU can read it
+        tmp_dir = Path(cls.cfg['scratch']) / ("test_input" + str(uuid.uuid4()))
+        os.makedirs(tmp_dir)
+        shutil.copy("data/small.forward.fq", tmp_dir)
+        shutil.copy("data/small.reverse.fq", tmp_dir)
+        shutil.copy("data/interleaved.fq", tmp_dir)
         # get file type from type
-        fwd_reads = {'file': 'data/small.forward.fq',
+        fwd_reads = {'file': tmp_dir / 'small.forward.fq',
                      'name': 'test_fwd.fastq',
                      'type': 'fastq'}
         # get file type from handle file name
-        rev_reads = {'file': 'data/small.reverse.fq',
+        rev_reads = {'file': tmp_dir / 'small.reverse.fq',
                      'name': 'test_rev.FQ',
                      'type': ''}
-        int_reads = {'file': 'data/interleaved.fq',
+        int_reads = {'file': tmp_dir / 'interleaved.fq',
                      'name': '',
                      'type': ''}
 
@@ -297,7 +266,7 @@ class kb_IDBATest(unittest.TestCase):
             ['foo'], 'Object foo cannot be accessed: No workspace with name ' +
             'Ireallyhopethisworkspacedoesntexistorthistestwillfail exists',
             wsname='Ireallyhopethisworkspacedoesntexistorthistestwillfail',
-            exception=WorkspaceError)
+            exception=ServerError)
 
 
     def test_no_libs_param(self):
@@ -311,7 +280,7 @@ class kb_IDBATest(unittest.TestCase):
             ['foo'],
             ('No object with name foo exists in workspace {} ' +
              '(name {})').format(str(self.wsinfo[0]), self.wsinfo[1]),
-            exception=WorkspaceError)
+            exception=ServerError)
 
 
     def test_no_libs(self):
@@ -392,7 +361,7 @@ class kb_IDBATest(unittest.TestCase):
 
         with self.assertRaises(exception) as context:
             self.getImpl().run_idba_ud(self.ctx, params)
-        self.assertEqual(error, str(context.exception.message))
+        self.assertEqual(error, str(context.exception.args[0]))
 
 
     def run_success(self, readnames, output_name, expected, min_contig_length=None, kval_args=None):

@@ -7,12 +7,12 @@ import re
 import uuid
 from pprint import pformat
 from pprint import pprint
-from biokbase.workspace.client import Workspace as workspaceService
+from installed_clients.WorkspaceClient import Workspace as workspaceService
 import subprocess
 import numpy as np
 from ReadsUtils.ReadsUtilsClient import ReadsUtils
 from ReadsUtils.baseclient import ServerError
-from AssemblyUtil.AssemblyUtilClient import AssemblyUtil
+from installed_clients.AssemblyUtilClient import AssemblyUtil
 from KBaseReport.KBaseReportClient import KBaseReport
 from kb_quast.kb_quastClient import kb_quast
 import time
@@ -459,13 +459,15 @@ https://github.com/loneknightpy/idba - Version 1.1.3
         self.log('Uploading FASTA file to Assembly')
         assemblyUtil = AssemblyUtil(self.callbackURL, token=ctx['token'], service_ver='dev')
         if params.get('min_contig_length', 0) > 0:
-            assemblyUtil.save_assembly_from_fasta({'file': {'path': output_contigs},
-                                                   'workspace_name': wsname,
-                                                   'assembly_name': params[self.PARAM_IN_CS_NAME],
-                                                   'min_contig_length': params['min_contig_length']
-                                               })
+            filtered_file = assemblyUtil.save_assembly_from_fasta2(
+                {
+                    'file': {'path': output_contigs},
+                    'workspace_name': wsname,
+                    'assembly_name': params[self.PARAM_IN_CS_NAME],
+                    'min_contig_length': params['min_contig_length']
+                })['filtered_input']
             # load report from scaffolds.fasta
-            report_name, report_ref = self.load_report(output_contigs+'.filtered.fa', params, wsname)
+            report_name, report_ref = self.load_report(filtered_file, params, wsname)
         else:
             assemblyUtil.save_assembly_from_fasta({'file': {'path': output_contigs},
                                                    'workspace_name': wsname,
