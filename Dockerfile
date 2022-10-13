@@ -1,12 +1,15 @@
-FROM kbase/kbase:sdkbase2.latest
+FROM kbase/sdkbase2:python
 MAINTAINER KBase Developer [Dylan Chivian (DCChivian@lbl.gov)]
 # -----------------------------------------
 
 # Insert apt-get instructions here to install
 # any required dependencies for your module.
 
-#RUN apt-get update -y
+RUN apt-get update -y
+RUN apt-get install -y wget g++
+RUN python --version
 RUN pip install --upgrade pip
+RUN pip --version
 
 # IDBA needs psutil
 RUN pip install psutil
