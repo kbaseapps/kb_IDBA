@@ -457,7 +457,7 @@ https://github.com/loneknightpy/idba - Version 1.1.3
         output_contigs = os.path.join(idba_out, 'contig.fa')
 
         self.log('Uploading FASTA file to Assembly')
-        assemblyUtil = AssemblyUtil(self.callbackURL, token=ctx['token'], service_ver='dev')
+        assemblyUtil = AssemblyUtil(self.callbackURL, token=ctx['token'])
         if params.get('min_contig_length', 0) > 0:
             filtered_file = assemblyUtil.save_assembly_from_fasta2(
                 {

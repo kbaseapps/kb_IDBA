@@ -1,3 +1,7 @@
+### Version 1.0.6
+__Changes__
+- Removed an invocation to the dev version of AssemblyUtil.
+
 ### Version 1.0.5
 __Changes__
 - Updated to python3 to fix build.
